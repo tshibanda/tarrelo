@@ -53,20 +53,7 @@
         "@type": "Person",
         "name": "Elie"
       },
-      "areaServed": [
-        {
-          "@type": "AdministrativeArea",
-          "name": "Yvelines"
-        },
-        {
-          "@type": "AdministrativeArea",
-          "name": "Val-d'Oise"
-        },
-        {
-          "@type": "Country",
-          "name": "France"
-        }
-      ],
+      "areaServed": {"@type": "Country", "name": "France"},
       "sameAs": []
     },
     {
@@ -613,7 +600,7 @@ html{scroll-behavior:smooth}section[id]{scroll-margin-top:80px}
 var D={plombier:{t1:'18:47',w1:'Mme Martin · 06 12 34 56 78',x1:"Fuite sous l'évier, cuisine. Pas urgent.",g1:'RDV pris : mardi 14h',t2:'21:12',w2:'M. Diallo',x2:'Devis pour une chaudière. Rappel souhaité demain matin.'},
 garage:{t1:'12:15',w1:'M. Lefèvre · 06 22 33 44 55',x1:'Bruit au freinage, Clio 4. Disponible jeudi.',g1:'RDV pris : jeudi 9h',t2:'19:40',w2:'Mme Roux',x2:'Demande si sa voiture est prête. Réponse donnée : demain 17h.'},
 cabinet:{t1:'08:05',w1:'Mme Bernard · 07 11 22 33 44',x1:'Douleur au dos, première consultation.',g1:'RDV pris : lundi 10h30',t2:'20:30',w2:'M. Petit',x2:'Annule son RDV de mercredi. Créneau libéré dans votre agenda.'},
-immobilier:{t1:'13:20',w1:'M. et Mme Garcia · 06 98 76 54 32',x1:'Intéressés par la maison de Mantes, budget validé.',g1:'Visite prise : samedi 11h',t2:'22:05',w2:'Mme Nguyen',x2:'Souhaite faire estimer son appartement. Rappel demain.'}};
+immobilier:{t1:'13:20',w1:'M. et Mme Garcia · 06 98 76 54 32',x1:'Intéressés par la maison avec jardin, budget validé.',g1:'Visite prise : samedi 11h',t2:'22:05',w2:'Mme Nguyen',x2:'Souhaite faire estimer son appartement. Rappel demain.'}};
 function set(k,v){document.querySelectorAll('[data-v="'+k+'"]').forEach(function(e){e.textContent=v;});}
 var ON='background: #14213D; color: #FFF8F1; border: 1.5px solid #14213D',OFF='background: #FFFFFF; color: #14213D; border: 1.5px solid #E8DFD3';
 document.querySelectorAll('[data-metier]').forEach(function(b){b.addEventListener('click',function(){

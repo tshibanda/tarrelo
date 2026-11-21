@@ -9,6 +9,43 @@
   status = 301
   force = true
 
+
+# Anciennes pages par ville (supprimées) : redirection vers la page métier
+[[redirects]]
+  from = "/plombiers/*"
+  to = "/plombiers"
+  status = 301
+
+[[redirects]]
+  from = "/electriciens/*"
+  to = "/electriciens"
+  status = 301
+
+[[redirects]]
+  from = "/garages/*"
+  to = "/garages"
+  status = 301
+
+[[redirects]]
+  from = "/cabinets-paramedicaux/*"
+  to = "/cabinets-paramedicaux"
+  status = 301
+
+[[redirects]]
+  from = "/agences-immobilieres/*"
+  to = "/agences-immobilieres"
+  status = 301
+
+[[redirects]]
+  from = "/serruriers/*"
+  to = "/serruriers"
+  status = 301
+
+[[redirects]]
+  from = "/peintres/*"
+  to = "/peintres"
+  status = 301
+
 [[headers]]
   for = "/*"
   [headers.values]
