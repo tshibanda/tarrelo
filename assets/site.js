@@ -49,3 +49,16 @@
     if (h !== '/' && (path === h || path.indexOf(h + '/') === 0) && !a.classList.contains('btn')) a.setAttribute('aria-current', 'page');
   });
 })();
+
+/* Barre d'action mobile : n'apparaît qu'une fois le bouton principal du haut de page dépassé */
+(function () {
+  var bar = document.querySelector('.mcta');
+  if (!bar) return;
+  bar.classList.add('mcta-bar');
+  var target = document.querySelector('#top .btn, main section:first-of-type .btn');
+  if (!target || !('IntersectionObserver' in window)) return;
+  bar.classList.add('is-hidden');
+  new IntersectionObserver(function (es) {
+    es.forEach(function (e) { bar.classList.toggle('is-hidden', e.isIntersecting || e.boundingClientRect.top > 0); });
+  }).observe(target);
+})();

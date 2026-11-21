@@ -71,3 +71,32 @@ details summary:hover{color:#B83A1E}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;scroll-behavior:auto !important}}
 @media (max-width:600px){.bf-banner{font-size:13px}.bf-banner .bf-long{display:none}.bf-banner .wrap{gap:6px 10px !important}}
+
+/* Lien d'évitement */
+.skip{position:absolute;left:-9999px;top:8px;z-index:50;background:#14213D;color:#FFF8F1;padding:10px 16px;border-radius:10px}
+.skip:focus{left:12px}
+
+/* Bandeau de confiance sous le hero */
+.trust-strip{background:#FFFFFF;border-top:1px solid #E8DFD3;border-bottom:1px solid #E8DFD3}
+.ts-in{display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:28px;padding-bottom:28px;text-align:center}
+.ts-t{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#4A5568;margin:0}
+.ts-m{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.ts-m a{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:700;font-size:16px;color:#14213D;text-decoration:none;padding:8px 14px;border-radius:999px;border:1px solid #E8DFD3;background:#FFF8F1;transition:border-color .15s,color .15s}
+.ts-m a:hover{border-color:#FF6B4A;color:#B83A1E}
+.ts-i{font-size:14px;color:#4A5568;margin:0}.ts-i span{font-weight:700;color:#14213D}
+
+/* Barre d'action mobile : masquée tant que le bouton principal est visible */
+.mcta-bar{transition:transform .25s ease,opacity .25s ease}
+.mcta-bar.is-hidden{transform:translateY(110%);opacity:0;pointer-events:none}
+
+@media (max-width:900px){
+  #top{padding-top:28px !important;padding-bottom:40px !important}
+  #top .h1x{font-size:38px !important;letter-spacing:-1px !important}
+  #top .hero{gap:28px !important}
+  section[id]:not(#top){padding-top:56px !important;padding-bottom:56px !important}
+  .ts-in{padding-top:20px;padding-bottom:20px}
+  .ts-m a{font-size:14px;padding:7px 12px}
+}
+@media (max-width:600px){
+  #top .hero > div:last-child{transform:scale(.8);transform-origin:top center;margin-bottom:-130px}
+}
