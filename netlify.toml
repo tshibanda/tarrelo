@@ -12,37 +12,107 @@
 
 # Anciennes pages par ville (supprimées) : redirection vers la page métier
 [[redirects]]
-  from = "/plombiers/*"
+  from = "/plombiers/mantes-la-jolie"
   to = "/plombiers"
   status = 301
 
 [[redirects]]
-  from = "/electriciens/*"
+  from = "/plombiers/poissy"
+  to = "/plombiers"
+  status = 301
+
+[[redirects]]
+  from = "/plombiers/les-mureaux"
+  to = "/plombiers"
+  status = 301
+
+[[redirects]]
+  from = "/electriciens/mantes-la-jolie"
   to = "/electriciens"
   status = 301
 
 [[redirects]]
-  from = "/garages/*"
+  from = "/electriciens/poissy"
+  to = "/electriciens"
+  status = 301
+
+[[redirects]]
+  from = "/electriciens/les-mureaux"
+  to = "/electriciens"
+  status = 301
+
+[[redirects]]
+  from = "/garages/mantes-la-jolie"
   to = "/garages"
   status = 301
 
 [[redirects]]
-  from = "/cabinets-paramedicaux/*"
+  from = "/garages/poissy"
+  to = "/garages"
+  status = 301
+
+[[redirects]]
+  from = "/garages/les-mureaux"
+  to = "/garages"
+  status = 301
+
+[[redirects]]
+  from = "/cabinets-paramedicaux/mantes-la-jolie"
   to = "/cabinets-paramedicaux"
   status = 301
 
 [[redirects]]
-  from = "/agences-immobilieres/*"
+  from = "/cabinets-paramedicaux/poissy"
+  to = "/cabinets-paramedicaux"
+  status = 301
+
+[[redirects]]
+  from = "/cabinets-paramedicaux/les-mureaux"
+  to = "/cabinets-paramedicaux"
+  status = 301
+
+[[redirects]]
+  from = "/agences-immobilieres/mantes-la-jolie"
   to = "/agences-immobilieres"
   status = 301
 
 [[redirects]]
-  from = "/serruriers/*"
+  from = "/agences-immobilieres/poissy"
+  to = "/agences-immobilieres"
+  status = 301
+
+[[redirects]]
+  from = "/agences-immobilieres/les-mureaux"
+  to = "/agences-immobilieres"
+  status = 301
+
+[[redirects]]
+  from = "/serruriers/mantes-la-jolie"
   to = "/serruriers"
   status = 301
 
 [[redirects]]
-  from = "/peintres/*"
+  from = "/serruriers/poissy"
+  to = "/serruriers"
+  status = 301
+
+[[redirects]]
+  from = "/serruriers/les-mureaux"
+  to = "/serruriers"
+  status = 301
+
+[[redirects]]
+  from = "/peintres/mantes-la-jolie"
+  to = "/peintres"
+  status = 301
+
+[[redirects]]
+  from = "/peintres/poissy"
+  to = "/peintres"
+  status = 301
+
+[[redirects]]
+  from = "/peintres/les-mureaux"
   to = "/peintres"
   status = 301
 
