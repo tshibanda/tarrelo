@@ -38,6 +38,8 @@ R = [
   (", offre Black Friday.\"", ".\""), (", offre Black Friday.", "."),
 ]
 REGEX = [
+  # Carte Black Friday au-dessus des offres (avec son style et son script)
+  (r'<!--bf-offer-->.*?<!--/bf-offer-->\n?', ''),
   # Bandeau Black Friday
   (r'<div class="bf-banner".*?</div>\n</div>\n?', ''),
   # Ancien bandeau éventuel (sans classe)

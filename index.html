@@ -479,14 +479,45 @@ html{scroll-behavior:smooth}section[id]{scroll-margin-top:80px}
 <p style="font-size: 14px; font-weight: 600; color: #B83A1E">Tarifs</p>
 <h2 class="h2x" style="font-size: 42px; line-height: 1.12; font-weight: 800; letter-spacing: -1px">Un seul client récupéré rembourse l'abonnement</h2>
 </div>
-<div style="background: #FFE3DA; border: 1px solid #FF6B4A; border-radius: 14px; padding: 18px 24px; display: flex; gap: 12px 24px; flex-wrap: wrap; align-items: center; font-size: 15px; font-weight: 500">
-<span style="font-weight: 700">Black Friday · code <span style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 800; letter-spacing: .08em; border: 1.5px dashed #14213D; padding: 2px 8px; border-radius: 6px">BLACKFRIDAY</span></span>
-<span>Installation offerte (au lieu de 99 €)</span>
-<span>1er mois offert (au lieu de 14 jours)</span>
-<span>Standard et Premium −20 €/mois</span>
-<span>Sans engagement</span>
-<span style="font-weight: 700; color: #B83A1E">Jusqu'au 30 novembre, 23h59</span>
+<!--bf-offer--><div class="bf-offer">
+<div class="bf-main">
+<span class="bf-tag">Black Friday</span>
+<p class="bf-title">−20 € par mois, <span>à vie</span>, sur Standard et Premium</p>
+<div class="bf-perks"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2A9D8F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Installation offerte <s>99 €</s></span><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2A9D8F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>1er mois offert</span><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2A9D8F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Sans engagement</span></div>
 </div>
+<div class="bf-side">
+<p class="bf-lbl">Votre code</p>
+<button type="button" class="bf-code" data-copy="BLACKFRIDAY" aria-label="Copier le code BLACKFRIDAY"><span>BLACKFRIDAY</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+<p class="bf-end">Fin dans <strong data-countdown="2026-11-30T23:59:59+01:00">quelques jours</strong></p>
+</div>
+</div>
+<style>
+.bf-offer{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#14213D;color:#FFF8F1;border-radius:20px;padding:24px 28px;position:relative;overflow:hidden}
+.bf-offer:before{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;border:28px solid #FF6B4A;opacity:.12}
+.bf-main{display:flex;flex-direction:column;gap:12px;min-width:0;flex:1 1 420px;position:relative}
+.bf-tag{align-self:flex-start;background:#FF6B4A;color:#14213D;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px}
+.bf-title{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:800;font-size:26px;line-height:1.2;letter-spacing:-.5px;margin:0}
+.bf-title span{color:#FF6B4A}
+.bf-perks{display:flex;flex-wrap:wrap;gap:8px}
+.bf-perks span{display:inline-flex;align-items:center;gap:6px;background:rgba(255,248,241,.08);border:1px solid rgba(255,248,241,.16);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:500}
+.bf-perks s{opacity:.6;margin-left:2px}
+.bf-side{display:flex;flex-direction:column;align-items:flex-start;gap:8px;position:relative}
+.bf-lbl{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin:0}
+.bf-code{display:inline-flex;align-items:center;gap:10px;font:inherit;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:800;font-size:20px;letter-spacing:.12em;color:#14213D;background:#FFF8F1;border:2px dashed #FF6B4A;border-radius:12px;padding:10px 16px;cursor:pointer;min-height:48px}
+.bf-code:hover{background:#FFE3DA}
+.bf-code.ok:after{content:"Copié !";font-size:12px;letter-spacing:0;color:#2A9D8F;font-family:Inter,system-ui,sans-serif}
+.bf-end{font-size:14px;margin:0;opacity:.9}.bf-end strong{color:#FF6B4A}
+@media (max-width:600px){.bf-offer{padding:20px}.bf-title{font-size:21px}.bf-side{width:100%}}
+</style>
+<script>
+(function(){
+document.querySelectorAll('.bf-code').forEach(function(b){b.addEventListener('click',function(){
+var t=b.getAttribute('data-copy');(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.classList.add('ok');setTimeout(function(){b.classList.remove('ok')},1800)},function(){});});});
+document.querySelectorAll('[data-countdown]').forEach(function(el){var end=new Date(el.getAttribute('data-countdown')).getTime();
+function tick(){var d=end-Date.now();if(d<=0){el.textContent='quelques instants';return;}var j=Math.floor(d/864e5),h=Math.floor(d%864e5/36e5),m=Math.floor(d%36e5/6e4);
+el.textContent=(j?j+' j ':'')+h+' h '+(j?'':m+' min');}tick();setInterval(tick,30000);});
+})();
+</script><!--/bf-offer-->
 <div class="g3" style="align-items: stretch">
 <div style="background: #FFFFFF; border: 1px solid #E8DFD3; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 20px">
 <div><h3 style="font-size: 22px; font-weight: 700">Standard</h3><p style="font-size: 15px; color: #4A5568; margin-top: 4px">Ne ratez plus aucun appel.</p></div>
