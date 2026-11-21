@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /commande
+Disallow: /merci
+
+Sitemap: https://tarrelo.com/sitemap.xml

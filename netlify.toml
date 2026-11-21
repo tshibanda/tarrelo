@@ -1,0 +1,33 @@
+# Tarrelo — configuration Netlify (site statique, comme Melflore).
+[build]
+  publish = "."
+
+# Une seule adresse officielle : https://tarrelo.com (sans www)
+[[redirects]]
+  from = "https://www.tarrelo.com/*"
+  to = "https://tarrelo.com/:splat"
+  status = 301
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+[[headers]]
+  for = "/merci*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/commande*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
