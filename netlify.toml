@@ -10,6 +10,13 @@
   force = true
 
 
+# Outils internes : jamais servis
+[[redirects]]
+  from = "/_outils/*"
+  to = "/404"
+  status = 404
+  force = true
+
 # Anciennes pages par ville (supprimées) : redirection vers la page métier
 [[redirects]]
   from = "/plombiers/mantes-la-jolie"
