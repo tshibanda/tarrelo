@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="/assets/tarrelo-vignette-180.png">
 <link rel="preload" href="/assets/fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
+<link rel="stylesheet" href="/assets/site.css">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="Tarrelo">
@@ -64,7 +65,7 @@ html{scroll-behavior:smooth}section[id]{scroll-margin-top:80px}
 .field{display:flex;flex-direction:column;gap:6px;font-size:15px;font-weight:500}
 .field input,.field select,.field textarea{font:inherit;font-weight:400;font-size:16px;min-height:48px;padding:10px 14px;border:1.5px solid #E8DFD3;border-radius:10px;background:#FFFFFF;color:#14213D;box-sizing:border-box}
 .field input:focus,.field select:focus,.field textarea:focus{outline:3px solid #FF6B4A;outline-offset:1px;border-color:#14213D}
-.navdd{position:relative}.navdd summary{cursor:pointer;color:#14213D;list-style:none}.navdd[open] .ddp{display:flex}.ddp{display:none;position:absolute;top:34px;left:-16px;flex-direction:column;gap:2px;background:#FFFFFF;border:1px solid #E8DFD3;border-radius:12px;padding:8px;min-width:240px;box-shadow:0 12px 32px rgba(20,33,61,.12)}.ddp a{padding:10px 12px;border-radius:8px;color:#14213D;text-decoration:none}.ddp a:hover{background:#FFF8F1}/*EXTRA_NAV_CSS*/
+
 [hidden]{display:none !important}
 .eyebrow{font-size:14px;font-weight:600;color:#B83A1E}
 .lead{font-size:19px;line-height:1.55;color:#4A5568}
@@ -86,9 +87,6 @@ html{scroll-behavior:smooth}section[id]{scroll-margin-top:80px}
 .field{display:flex;flex-direction:column;gap:6px;font-size:15px;font-weight:500}
 .field input,.field select,.field textarea{font:inherit;font-weight:400;font-size:16px;min-height:48px;padding:10px 14px;border:1.5px solid #E8DFD3;border-radius:10px;background:#FFFFFF;color:#14213D;box-sizing:border-box}
 .field input:focus,.field select:focus,.field textarea:focus{outline:3px solid #FF6B4A;outline-offset:1px;border-color:#14213D}
-.navdd{position:relative}.navdd summary{cursor:pointer;color:#14213D;list-style:none}
-.navdd[open] .ddp{display:flex}.ddp{display:none;position:absolute;top:34px;left:-16px;flex-direction:column;gap:2px;background:#FFFFFF;border:1px solid #E8DFD3;border-radius:12px;padding:8px;min-width:240px;box-shadow:0 12px 32px rgba(20,33,61,.12)}
-.ddp a{padding:10px 12px;border-radius:8px;color:#14213D;text-decoration:none}.ddp a:hover{background:#FFF8F1}
 .quiz label{display:flex;gap:10px;align-items:center;font-size:16px;padding:12px 14px;border:1.5px solid #E8DFD3;border-radius:10px;background:#FFFFFF;cursor:pointer}
 .quiz label:has(input:checked){border-color:#14213D;background:#FFF8F1}
 html{scroll-behavior:smooth}</style>
@@ -119,27 +117,38 @@ html{scroll-behavior:smooth}</style>
 </head>
 <body>
 <a href="#contenu" style="position: absolute; left: -9999px">Aller au contenu</a>
-<div style="background: #14213D; color: #FFF8F1; font-size: 14px; font-weight: 500">
+<div class="bf-banner" style="background: #14213D; color: #FFF8F1; font-size: 14px; font-weight: 500">
 <div class="wrap" style="display: flex; align-items: center; justify-content: center; gap: 8px 14px; flex-wrap: wrap; min-height: 44px; padding-top: 8px; padding-bottom: 8px; text-align: center">
 <span style="background: #FF6B4A; color: #14213D; font-weight: 700; padding: 4px 10px; border-radius: 999px; font-size: 13px">Black Friday</span>
-<span>Installation et 1er mois offerts, −20 €/mois avec le code</span>
+<span><span class="bf-long">Installation et 1er mois offerts, </span>−20 €/mois avec le code</span>
 <span style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 800; letter-spacing: .08em; border: 1.5px dashed #FF6B4A; color: #FF6B4A; padding: 3px 10px; border-radius: 6px">BLACKFRIDAY</span>
 <span style="opacity: .8">jusqu'au 30/11, 23h59</span>
 </div>
 </div>
-<header style="position: sticky; top: 0; z-index: 5; background: #FFF8F1; border-bottom: 1px solid #E8DFD3">
-<div class="wrap" style="display: flex; align-items: center; justify-content: space-between; height: 72px">
+<header class="site-hd">
+<div class="wrap" style="display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 12px">
 <a href="/" aria-label="Tarrelo, accueil" style="display: flex; align-items: center; gap: 1px; text-decoration: none"><span style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -1px; color: #14213D">tarrel<span style="color: #FF6B4A">o</span><svg viewBox="0 0 100 100" fill="none" stroke="#FF6B4A" stroke-linecap="round" aria-hidden="true" style="width: 1em; height: 1em; vertical-align: baseline; overflow: visible; margin-left: -0.62em; margin-right: -0.38em"><path d="M37.9 33.6A40 40 0 0 1 68.6 59.3" stroke-width="7"></path><path d="M44.7 21.8A53 53 0 0 1 79 50.6" stroke-width="5.5" opacity="0.5"></path></svg></span></a>
 <nav class="navlinks" aria-label="Navigation principale" style="font-size: 15px; font-weight: 500">
-<details class="navdd"><summary>Métiers ▾</summary><div class="ddp"><a href="/plombiers">Plombiers et chauffagistes</a><a href="/electriciens">Électriciens</a><a href="/garages">Garages et carrossiers</a><a href="/cabinets-paramedicaux">Cabinets paramédicaux</a><a href="/agences-immobilieres">Agences immobilières</a></div></details>
-<a href="/tarifs" style="color: #14213D; text-decoration: none">Tarifs</a>
-<a href="/calculateur" style="color: #14213D; text-decoration: none">Calculateur</a>
-<a href="/demo" style="color: #14213D; text-decoration: none">Démo</a>
-<a href="/ressources" style="color: #14213D; text-decoration: none">Ressources</a>
+<div class="navdd"><button type="button" class="navdd-btn" aria-expanded="false" aria-controls="ddp">Métiers <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="ddp" id="ddp" hidden><a href="/plombiers">Plombiers et chauffagistes</a><a href="/electriciens">Électriciens</a><a href="/garages">Garages et carrossiers</a><a href="/cabinets-paramedicaux">Cabinets paramédicaux</a><a href="/agences-immobilieres">Agences immobilières</a><a href="/serruriers">Serruriers</a><a href="/peintres">Peintres en bâtiment</a><a href="/autres-metiers">Autres métiers</a></div></div>
+<a href="/tarifs" class="nl">Tarifs</a>
+<a href="/calculateur" class="nl">Calculateur</a>
+<a href="/demo" class="nl">Démo</a>
+<a href="/ressources" class="nl">Ressources</a>
 <a href="/tarifs" class="btn" style="background: #FF6B4A; color: #14213D; min-height: 44px; padding: 0 20px; font-size: 15px">Essayer 1 mois offert</a>
 </nav>
-<a href="/tarifs" class="btn mcta" style="background: #FF6B4A; color: #14213D; min-height: 44px; padding: 0 16px; font-size: 15px">Essayer</a>
+<div class="mobonly" style="align-items: center; gap: 8px">
+<a href="/tarifs" class="btn" style="background: #FF6B4A; color: #14213D; min-height: 44px; padding: 0 16px; font-size: 15px">Essayer</a>
+<button type="button" class="burger" aria-expanded="false" aria-controls="mnav" aria-label="Ouvrir le menu"><span></span><span></span><span></span></button>
 </div>
+</div>
+<div id="mnav" class="mnav" hidden>
+<nav aria-label="Menu mobile" class="wrap" style="display: flex; flex-direction: column; gap: 4px; padding-top: 12px; padding-bottom: 24px">
+<p class="mnav-t">Métiers</p><div class="mnav-grid"><a href="/plombiers">Plombiers et chauffagistes</a><a href="/electriciens">Électriciens</a><a href="/garages">Garages et carrossiers</a><a href="/cabinets-paramedicaux">Cabinets paramédicaux</a><a href="/agences-immobilieres">Agences immobilières</a><a href="/serruriers">Serruriers</a><a href="/peintres">Peintres en bâtiment</a><a href="/autres-metiers">Autres métiers</a></div>
+<p class="mnav-t">Tarrelo</p>
+<a href="/tarifs" class="mnav-l">Tarifs</a><a href="/demo" class="mnav-l">Démo</a><a href="/calculateur" class="mnav-l">Calculateur de pertes</a><a href="/test-accueil" class="mnav-l">Test de votre accueil</a><a href="/comparatif-secretariat" class="mnav-l">Comparatif secrétariat</a><a href="/ressources" class="mnav-l">Guides</a>
+<a href="/tarifs" class="btn" style="background: #FF6B4A; color: #14213D; margin-top: 16px">Essayer 1 mois offert</a>
+<a href="/demo" class="btn" style="border: 1.5px solid #14213D; color: #14213D">Demander la démo</a>
+</nav></div>
 </header>
 <nav aria-label="Fil d'Ariane" class="wrap crumbs" style="padding-top: 24px"><a href="/">Accueil</a><span aria-hidden="true">›</span><span aria-current="page">Test de votre accueil</span></nav>
 <main id="contenu">
@@ -172,7 +181,7 @@ html{scroll-behavior:smooth}</style>
 <p style="font-size: 14px; line-height: 1.6">Votre téléphone ne sonne plus jamais dans le vide.</p>
 <p style="font-size: 14px"><a href="mailto:contact@tarrelo.com" style="color: #E8DFD3">contact@tarrelo.com</a></p>
 </div>
-<nav aria-label="Métiers" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px"><p style="font-weight: 700; color: #FFF8F1">Métiers</p><a href="/plombiers" style="color: #E8DFD3; text-decoration: none">Plombiers et chauffagistes</a><a href="/electriciens" style="color: #E8DFD3; text-decoration: none">Électriciens</a><a href="/garages" style="color: #E8DFD3; text-decoration: none">Garages et carrossiers</a><a href="/cabinets-paramedicaux" style="color: #E8DFD3; text-decoration: none">Cabinets paramédicaux</a><a href="/agences-immobilieres" style="color: #E8DFD3; text-decoration: none">Agences immobilières</a></nav>
+<nav aria-label="Métiers" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px"><p style="font-weight: 700; color: #FFF8F1">Métiers</p><a href="/plombiers" style="color: #E8DFD3; text-decoration: none">Plombiers et chauffagistes</a><a href="/electriciens" style="color: #E8DFD3; text-decoration: none">Électriciens</a><a href="/garages" style="color: #E8DFD3; text-decoration: none">Garages et carrossiers</a><a href="/cabinets-paramedicaux" style="color: #E8DFD3; text-decoration: none">Cabinets paramédicaux</a><a href="/agences-immobilieres" style="color: #E8DFD3; text-decoration: none">Agences immobilières</a><a href="/serruriers" style="color: #E8DFD3; text-decoration: none">Serruriers</a><a href="/peintres" style="color: #E8DFD3; text-decoration: none">Peintres en bâtiment</a><a href="/autres-metiers" style="color: #E8DFD3; text-decoration: none">Autres métiers</a></nav>
 <nav aria-label="Outils" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px"><p style="font-weight: 700; color: #FFF8F1">Outils et ressources</p><a href="/tarifs" style="color: #E8DFD3; text-decoration: none">Tarifs</a><a href="/demo" style="color: #E8DFD3; text-decoration: none">Démo</a><a href="/calculateur" style="color: #E8DFD3; text-decoration: none">Calculateur de pertes</a><a href="/test-accueil" style="color: #E8DFD3; text-decoration: none">Test de votre accueil</a><a href="/comparatif-secretariat" style="color: #E8DFD3; text-decoration: none">Comparatif secrétariat</a><a href="/ressources" style="color: #E8DFD3; text-decoration: none">Guides</a><a href="/newsletter" style="color: #E8DFD3; text-decoration: none">Newsletter</a></nav>
 <nav aria-label="Informations légales" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px"><p style="font-weight: 700; color: #FFF8F1">Informations</p><a href="/mentions-legales" style="color: #E8DFD3; text-decoration: none">Mentions légales</a><a href="/cgv" style="color: #E8DFD3; text-decoration: none">CGV</a><a href="/confidentialite" style="color: #E8DFD3; text-decoration: none">Confidentialité</a></nav>
 </div>
@@ -183,6 +192,7 @@ html{scroll-behavior:smooth}</style>
 <a href="/tarifs" class="btn" style="flex: 1; background: #FF6B4A; color: #14213D">1 mois offert</a>
 <a href="/demo" class="btn" style="border: 1.5px solid #14213D; color: #14213D">Démo</a>
 </div>
+<script src="/assets/site.js" defer></script>
 <script>(function(){var T=["Ne laissez plus un appel sonner dans le vide : au minimum, un répondeur avec vos horaires et un moyen de vous joindre en urgence.", "Rappelez dans l'heure : passé ce délai, la plupart des clients ont déjà contacté quelqu'un d'autre.", "Proposez une prise de rendez-vous en dehors de vos horaires : c'est le soir que beaucoup de particuliers appellent.", "Réécrivez votre message d'accueil : nom, horaires, délai de rappel. Voir nos <a href=\"/ressources/message-accueil-telephonique\">exemples</a>.", "Comptez vos appels manqués une semaine dans votre journal d'appels : c'est le point de départ.", "Mettez les réponses aux questions répétitives (horaires, zone, tarifs) sur votre fiche Google et votre répondeur.", "Bloquez les interruptions pendant vos rendez-vous : un renvoi d'appel sur non-réponse suffit.", "Chiffrez ce que les appels perdus vous coûtent avec le <a href=\"/calculateur\">calculateur</a>."];
 var f=document.getElementById('quiz');f.addEventListener('submit',function(e){e.preventDefault();var tot=0,low=[];
 for(var i=0;i<8;i++){var v=+f.querySelector('input[name=q'+i+']:checked').value;tot+=v;low.push([v,i]);}
