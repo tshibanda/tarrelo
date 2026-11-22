@@ -155,20 +155,25 @@ html{scroll-behavior:smooth}</style>
 <section style="padding: 40px 0 56px"><div class="wrap"><div style="display: flex; flex-direction: column; gap: 16px; max-width: 880px">
 <p class="eyebrow">Démo</p>
 <h1 class="h1x" style="font-size: 52px; line-height: 1.06; font-weight: 800; letter-spacing: -1.6px">Écoutez-la répondre. Jugez par vous-même.</h1>
-<p class="lead">Laissez-nous votre numéro : on vous envoie par SMS le numéro de démo de votre métier. Appelez-le comme le ferait un de vos clients, et testez-la avec vos vraies questions.</p>
+<p class="lead">En 3 minutes, on prépare une assistante qui décroche au nom de votre entreprise. Vous recevez son numéro par SMS : appelez-la comme le ferait un de vos clients, et testez-la avec vos vraies questions.</p>
 </div></div></section>
 <section style="padding: 0 0 72px"><div class="wrap g2" style="gap: 48px; align-items: start">
-<form name="demo" method="POST" action="/merci" data-netlify="true" netlify-honeypot="site-web" class="card" style="display: flex; flex-direction: column; gap: 16px; padding: 28px">
+<form name="demo" id="demo-form" method="POST" action="/merci" data-netlify="true" netlify-honeypot="site-web" class="card" style="display: flex; flex-direction: column; gap: 16px; padding: 28px">
 <input type="hidden" name="form-name" value="demo">
-<p hidden><label>Ne pas remplir <input name="site-web"></label></p>
-<h2 style="font-size: 24px; font-weight: 800">Recevoir le numéro de démo</h2>
+<p hidden><label>Ne pas remplir <input name="site-web" tabindex="-1" autocomplete="off"></label></p>
+<h2 style="font-size: 24px; font-weight: 800">Recevoir ma démo personnalisée</h2>
 <label class="field">Prénom<input name="prenom" autocomplete="given-name" required></label>
 <label class="field">Entreprise<input name="entreprise" autocomplete="organization" required></label>
 <label class="field">Votre métier<select name="metier" required><option>Plombiers et chauffagistes</option><option>Électriciens</option><option>Garages et carrossiers</option><option>Cabinets paramédicaux</option><option>Agences immobilières</option><option>Serruriers</option><option>Peintres en bâtiment</option><option>Autre</option></select></label>
-<label class="field">Téléphone mobile<input name="telephone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="06 12 34 56 78"></label>
+<label class="field">Ville ou zone d'intervention<input name="ville" autocomplete="address-level2" required placeholder="Rouen et agglomération"></label>
+<label class="field">Site web ou fiche Google <span style="font-weight: 400; color: #4A5568">(facultatif)</span><input name="lien" type="text" inputmode="url" placeholder="https://… ou lien Google Maps"></label>
+<p style="font-size: 13px; color: #4A5568; margin-top: -8px">Il nous sert à apprendre vos services, horaires et zone pour que l'assistante réponde comme vous.</p>
+<label class="field">Téléphone mobile<input name="telephone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="06 12 34 56 78" pattern="^(\+33\s?|0)[67]([\s.\-]?[0-9]{2}){4}$" title="Un numéro de mobile français (06 ou 07)"></label>
 <label class="field">E-mail<input name="email" type="email" autocomplete="email" required></label>
-<button type="submit" class="btn" style="background: #FF6B4A; color: #14213D; border: 0; cursor: pointer; font: inherit; font-weight: 600; font-size: 17px">Recevoir le numéro</button>
-<p style="font-size: 13px; color: #4A5568">On utilise ces informations uniquement pour vous envoyer la démo et vous recontacter à ce sujet. <a href="/confidentialite">Confidentialité</a>.</p>
+<label style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.5"><input type="checkbox" name="consentement" required style="margin-top: 4px"><span>J'accepte de recevoir par SMS et par e-mail le numéro de ma démo et son compte rendu, et d'être recontacté à ce sujet. <a href="/confidentialite">Confidentialité</a>.</span></label>
+<button type="submit" class="btn" style="background: #FF6B4A; color: #14213D; border: 0; cursor: pointer; font: inherit; font-weight: 600; font-size: 17px">Préparer ma démo</button>
+<p style="font-size: 13px; color: #4A5568">La démo est valable pour un appel de 10 minutes maximum, depuis le mobile indiqué.</p>
+<p id="demo-status" role="status" aria-live="polite" style="font-size: 15px; font-weight: 600" hidden></p>
 </form>
 <div style="display: flex; flex-direction: column; gap: 16px">
 <h2 class="h2x" style="font-size: 34px; line-height: 1.15; font-weight: 800; letter-spacing: -.8px">À quoi ressemble un appel</h2>
@@ -237,6 +242,19 @@ html{scroll-behavior:smooth}</style>
 document.querySelectorAll('[data-tab]').forEach(function(b){b.addEventListener('click',function(){
 document.querySelectorAll('[data-tab]').forEach(function(o){var a=o===b;o.setAttribute('aria-pressed',a);o.setAttribute('style',a?ON:OFF);});
 document.querySelectorAll('[data-pane]').forEach(function(p){p.hidden=p.dataset.pane!==b.dataset.tab;});});});})();
+</script>
+<script>
+(function(){var f=document.getElementById('demo-form');if(!f)return;var t0=Date.now(),st=document.getElementById('demo-status'),btn=f.querySelector('button[type=submit]');
+function show(m,ok){st.hidden=false;st.textContent=m;st.style.color=ok?'#14213D':'#B83A1E';}
+f.addEventListener('submit',function(e){e.preventDefault();if(!f.reportValidity())return;btn.disabled=true;btn.textContent='Préparation en cours…';
+var d=new FormData(f),p=new URLSearchParams();
+p.append('company',d.get('entreprise')||'');p.append('first_name',d.get('prenom')||'');p.append('trade',d.get('metier')||'');p.append('city',d.get('ville')||'');p.append('source_url',d.get('lien')||'');p.append('phone',d.get('telephone')||'');p.append('email',d.get('email')||'');p.append('consent',d.get('consentement')?'true':'false');p.append('website',d.get('site-web')||'');p.append('elapsed_ms',String(Date.now()-t0));
+var nf=new URLSearchParams();d.forEach(function(v,k){nf.append(k,v);});
+fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:nf.toString()}).catch(function(){});
+fetch('https://tarrelo.app.n8n.cloud/webhook/tarrelo/demo',{method:'POST',body:p}).then(function(r){return r.json().catch(function(){return {ok:r.ok};});}).then(function(j){
+if(j&&j.ok){f.querySelectorAll('input,select,button').forEach(function(x){x.disabled=true;});btn.textContent='Démo en préparation';show('C\'est parti ! Votre assistante est prête dans quelques minutes : vous recevrez son numéro par SMS et par e-mail.',true);}
+else{btn.disabled=false;btn.textContent='Préparer ma démo';show('Vérifiez vos informations (mobile en 06 ou 07, e-mail, case cochée), puis réessayez.',false);}
+}).catch(function(){btn.disabled=false;btn.textContent='Préparer ma démo';show('Le service est momentanément indisponible. Écrivez-nous à contact@tarrelo.com.',false);});});})();
 </script>
 </body>
 </html>
