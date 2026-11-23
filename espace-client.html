@@ -131,21 +131,30 @@ html{scroll-behavior:smooth}</style>
 </header>
 
 <main id="contenu">
+<main id="contenu">
 <section style="padding: 40px 0 80px"><div class="wrap"><div style="display: grid; gap: 32px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start">
 <div style="display: flex; flex-direction: column; gap: 16px">
 <p class="eyebrow">Espace client</p>
 <h1 class="h1x" style="font-size: 48px; line-height: 1.06; font-weight: 800; letter-spacing: -1.4px">Votre abonnement, en libre-service.</h1>
 <p class="lead">Consultez et téléchargez vos factures, mettez à jour vos coordonnées et votre moyen de paiement, changez de formule ou résiliez, sans frais.</p>
-<p style="font-size: 15px; color: #4A5568">Votre numéro client (il commence par « cus_ ») figure dans l'e-mail de bienvenue envoyé à la souscription. Introuvable ? Écrivez à <a href="mailto:contact@tarrelo.com">contact@tarrelo.com</a>.</p>
+<p style="font-size: 15px; color: #4A5568">Connectez-vous avec l'e-mail utilisé lors de votre commande et le mot de passe choisi à l'activation. Pas encore activé ? Utilisez le lien reçu par e-mail, ou « Mot de passe oublié ».</p>
 </div>
+<div style="display: flex; flex-direction: column; gap: 16px">
 <form id="ec-form" class="card" style="display: flex; flex-direction: column; gap: 16px; padding: 28px">
-<h2 style="font-size: 24px; font-weight: 800">Accéder à mon espace</h2>
-<label class="field">Numéro client<input name="customer" required placeholder="cus_…" autocomplete="off" pattern="^cus_[A-Za-z0-9]{8,}$" title="Le numéro commence par cus_"></label>
-<label class="field">E-mail de l'abonnement<input name="email" type="email" required autocomplete="email"></label>
+<h2 style="font-size: 24px; font-weight: 800">Se connecter</h2>
+<label class="field">E-mail<input name="email" type="email" required autocomplete="email"></label>
+<label class="field">Mot de passe<input name="password" type="password" required autocomplete="current-password"></label>
 <button type="submit" class="btn" style="background: #FF6B4A; color: #14213D; border: 0; cursor: pointer; font: inherit; font-weight: 600; font-size: 17px">Accéder à mon espace</button>
-<p style="font-size: 13px; color: #4A5568">Vous serez redirigé vers l'espace sécurisé de notre prestataire de paiement, Stripe.</p>
+<p style="font-size: 14px"><a href="#oubli" id="ec-oubli-lien">Mot de passe oublié ou espace pas encore activé ?</a></p>
 <p id="ec-status" role="status" aria-live="polite" style="font-size: 15px; font-weight: 600; color: #B83A1E" hidden></p>
 </form>
+<form id="ec-oubli" class="card" style="display: flex; flex-direction: column; gap: 16px; padding: 28px" hidden>
+<h2 style="font-size: 20px; font-weight: 800">Recevoir un lien par e-mail</h2>
+<label class="field">E-mail de la commande<input name="email" type="email" required autocomplete="email"></label>
+<button type="submit" class="btn" style="background: #FF6B4A; color: #14213D; border: 0; cursor: pointer; font: inherit; font-weight: 600; font-size: 17px">Envoyer le lien</button>
+<p id="ec-oubli-status" role="status" aria-live="polite" style="font-size: 15px; font-weight: 600; color: #14213D" hidden></p>
+</form>
+</div>
 </div></div></section>
 </main>
 <footer style="background: #14213D; color: #E8DFD3; padding: 56px 0 96px">
@@ -170,12 +179,13 @@ html{scroll-behavior:smooth}</style>
 <script src="/assets/site.js" defer></script>
 
 <script>
-(function(){var f=document.getElementById('ec-form'),st=document.getElementById('ec-status'),b=f.querySelector('button');
+(function(){var H='https://tarrelo.app.n8n.cloud/webhook/tarrelo/compte/';function post(u,d){var p=new URLSearchParams();for(var k in d)p.append(k,d[k]);return fetch(H+u,{method:'POST',body:p}).then(function(r){return r.json();});}
+var f=document.getElementById('ec-form'),st=document.getElementById('ec-status'),b=f.querySelector('button'),o=document.getElementById('ec-oubli'),os=document.getElementById('ec-oubli-status');
+var err='Service momentanément indisponible. Écrivez-nous à contact@tarrelo.com.';
+document.getElementById('ec-oubli-lien').addEventListener('click',function(e){e.preventDefault();o.hidden=false;o.email.value=f.email.value;o.email.focus();});
 f.addEventListener('submit',function(e){e.preventDefault();if(!f.reportValidity())return;b.disabled=true;b.textContent='Vérification…';st.hidden=true;
-var p=new URLSearchParams();p.append('customer',f.customer.value.trim());p.append('email',f.email.value.trim());
-fetch('https://tarrelo.app.n8n.cloud/webhook/tarrelo/espace-client',{method:'POST',body:p}).then(function(r){return r.json();}).then(function(j){
-if(j&&j.url){window.location.href=j.url;}else{st.hidden=false;st.textContent='Numéro client ou e-mail incorrect.';b.disabled=false;b.textContent='Accéder à mon espace';}
-}).catch(function(){st.hidden=false;st.textContent='Service momentanément indisponible. Écrivez-nous à contact@tarrelo.com.';b.disabled=false;b.textContent='Accéder à mon espace';});});})();
+post('connexion',{email:f.email.value.trim(),password:f.password.value}).then(function(j){if(j&&j.ok&&j.url){window.location.href=j.url;return;}st.hidden=false;st.textContent=(j&&j.error)||err;b.disabled=false;b.textContent='Accéder à mon espace';}).catch(function(){st.hidden=false;st.textContent=err;b.disabled=false;b.textContent='Accéder à mon espace';});});
+o.addEventListener('submit',function(e){e.preventDefault();if(!o.reportValidity())return;post('oubli',{email:o.email.value.trim()}).catch(function(){}).then(function(){os.hidden=false;os.textContent='Si un compte existe pour cette adresse, un lien vient de vous être envoyé (valable 2 heures).';});});})();
 </script>
 </body>
 </html>
