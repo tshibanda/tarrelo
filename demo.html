@@ -155,7 +155,7 @@ html{scroll-behavior:smooth}</style>
 <section style="padding: 40px 0 56px"><div class="wrap"><div style="display: flex; flex-direction: column; gap: 16px; max-width: 880px">
 <p class="eyebrow">Démo</p>
 <h1 class="h1x" style="font-size: 52px; line-height: 1.06; font-weight: 800; letter-spacing: -1.6px">Écoutez-la répondre. Jugez par vous-même.</h1>
-<p class="lead">En 3 minutes, on prépare une assistante qui décroche au nom de votre entreprise. Vous recevez son numéro par SMS : appelez-la comme le ferait un de vos clients, et testez-la avec vos vraies questions.</p>
+<p class="lead">En 3 minutes, on prépare un assistant qui décroche au nom de votre entreprise. Vous recevez son numéro par SMS : appelez-la comme le ferait un de vos clients, et testez-la avec vos vraies questions.</p>
 </div></div></section>
 <section style="padding: 0 0 72px"><div class="wrap g2" style="gap: 48px; align-items: start">
 <form name="demo" id="demo-form" method="POST" action="/merci" data-netlify="true" netlify-honeypot="site-web" class="card" style="display: flex; flex-direction: column; gap: 16px; padding: 28px">
@@ -167,7 +167,7 @@ html{scroll-behavior:smooth}</style>
 <label class="field">Votre métier<select name="metier" required><option>Plombiers et chauffagistes</option><option>Électriciens</option><option>Garages et carrossiers</option><option>Cabinets paramédicaux</option><option>Agences immobilières</option><option>Serruriers</option><option>Peintres en bâtiment</option><option>Autre</option></select></label>
 <label class="field">Ville ou zone d'intervention<input name="ville" autocomplete="address-level2" required placeholder="Rouen et agglomération"></label>
 <label class="field">Site web ou fiche Google <span style="font-weight: 400; color: #4A5568">(facultatif)</span><input name="lien" type="text" inputmode="url" placeholder="https://… ou lien Google Maps"></label>
-<p style="font-size: 13px; color: #4A5568; margin-top: -8px">Il nous sert à apprendre vos services, horaires et zone pour que l'assistante réponde comme vous.</p>
+<p style="font-size: 13px; color: #4A5568; margin-top: -8px">Il nous sert à apprendre vos services, horaires et zone pour que l'assistant réponde comme vous.</p>
 <label class="field">Téléphone mobile<input name="telephone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="06 12 34 56 78" pattern="^(\+33\s?|0)[67]([\s.\-]?[0-9]{2}){4}$" title="Un numéro de mobile français (06 ou 07)"></label>
 <label class="field">E-mail<input name="email" type="email" autocomplete="email" required></label>
 <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.5"><input type="checkbox" name="consentement" required style="margin-top: 4px"><span>J'accepte de recevoir par SMS et par e-mail le numéro de ma démo et son compte rendu, et d'être recontacté à ce sujet. <a href="/confidentialite">Confidentialité</a>.</span></label>
@@ -200,13 +200,13 @@ html{scroll-behavior:smooth}</style>
 <p style="font-size: 13px; font-weight: 700; color: #B83A1E">Exemple d'appel</p><div class="bubble"><p class="who">Client</p><p>Bonjour, je voudrais repeindre mon salon et deux chambres.</p></div><div class="bubble me"><p class="who">Tarrelo</p><p>Avec plaisir. Les murs sont-ils en bon état, ou faut-il reboucher des fissures ?</p></div><div class="bubble"><p class="who">Client</p><p>Quelques fissures dans le salon.</p></div><div class="bubble me"><p class="who">Tarrelo</p><p>Je note. Je vous propose un passage jeudi à 18h pour le devis.</p></div>
 <div style="margin-top: 8px; background: #14213D; color: #FFF8F1; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.5"><strong style="color: #FF6B4A">SMS reçu ·</strong> Devis · Mme Morel · salon + 2 chambres · fissures salon · visite jeudi 18h</div>
 </div></div>
-<p style="font-size: 15px; color: #4A5568">Exemples réécrits à partir de démos. Votre assistante utilisera vos informations, votre ton et votre nom d'entreprise.</p>
+<p style="font-size: 15px; color: #4A5568">Exemples réécrits à partir de démos. Votre assistant utilisera vos informations, votre ton et votre nom d'entreprise.</p>
 </div></div></section>
 <section style="padding: 0 0 56px"><div class="wrap prose" style="max-width: 820px">
 <h2>Ce que vous pouvez tester pendant la démo</h2>
-<ul><li>Posez une question piège ou hors sujet : elle reste polie et prend un message.</li>
-<li>Demandez un rendez-vous, puis changez d'avis : elle s'adapte.</li>
-<li>Signalez une urgence : elle la reconnaît et explique qu'elle prévient le professionnel.</li>
+<ul><li>Posez une question piège ou hors sujet : il reste poli et prend un message.</li>
+<li>Demandez un rendez-vous, puis changez d'avis : il s'adapte.</li>
+<li>Signalez une urgence : il la reconnaît et explique qu'il prévient le professionnel.</li>
 <li>Parlez vite, avec du bruit autour : comme vos clients sur un chantier ou en voiture.</li></ul>
 </div></section><section style="padding: 0 0 88px"><div class="wrap">
 <div style="background: #FF6B4A; border-radius: 24px; padding: 56px 40px; display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center">
@@ -252,7 +252,7 @@ p.append('company',d.get('entreprise')||'');p.append('first_name',d.get('prenom'
 var nf=new URLSearchParams();d.forEach(function(v,k){nf.append(k,v);});
 fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:nf.toString()}).catch(function(){});
 fetch('https://tarrelo.app.n8n.cloud/webhook/tarrelo/demo',{method:'POST',body:p}).then(function(r){return r.json().catch(function(){return {ok:r.ok};});}).then(function(j){
-if(j&&j.ok){f.querySelectorAll('input,select,button').forEach(function(x){x.disabled=true;});btn.textContent='Démo en préparation';show('C\'est parti ! Votre assistante est prête dans quelques minutes : vous recevrez son numéro par SMS et par e-mail.',true);}
+if(j&&j.ok){f.querySelectorAll('input,select,button').forEach(function(x){x.disabled=true;});btn.textContent='Démo en préparation';show('C\'est parti ! Votre assistant est prêt dans quelques minutes : vous recevrez son numéro par SMS et par e-mail.',true);}
 else{btn.disabled=false;btn.textContent='Préparer ma démo';show('Vérifiez vos informations (mobile en 06 ou 07, e-mail, case cochée), puis réessayez.',false);}
 }).catch(function(){btn.disabled=false;btn.textContent='Préparer ma démo';show('Le service est momentanément indisponible. Écrivez-nous à contact@tarrelo.com.',false);});});})();
 </script>
