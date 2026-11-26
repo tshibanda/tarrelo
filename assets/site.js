@@ -62,3 +62,33 @@
     es.forEach(function (e) { bar.classList.toggle('is-hidden', e.isIntersecting || e.boundingClientRect.top > 0); });
   }).observe(target);
 })();
+
+/* Mesure d'audience Tarrelo : sans cookie, anonyme (adresse IP jamais stockée) */
+(function () {
+  if (navigator.doNotTrack === '1' || /^(localhost|127\.)/.test(location.hostname)) return;
+  function send(d) {
+    var b = JSON.stringify(d);
+    try { if (navigator.sendBeacon && navigator.sendBeacon('/api/h', b)) return; } catch (e) {}
+    try { fetch('/api/h', { method: 'POST', body: b, keepalive: true }); } catch (e) {}
+  }
+  var q = new URLSearchParams(location.search);
+  send({ t: 'v', p: location.pathname.replace(/\.html$/, '') || '/', r: document.referrer, w: window.innerWidth, s: q.get('utm_source') || '' });
+  window.tarreloTrack = function (n) { send({ t: 'e', n: n, p: location.pathname.replace(/\.html$/, '') || '/' }); };
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a');
+    if (!a) return;
+    var h = a.getAttribute('href') || '';
+    if (/^tel:/.test(h)) tarreloTrack('tel');
+    else if (/buy\.stripe\.com/.test(h)) tarreloTrack('paiement');
+    else if (/^\/tarifs/.test(h) && /essai|offert|mois/i.test(a.textContent)) tarreloTrack('cta_essai');
+    else if (/^\/demo/.test(h)) tarreloTrack('cta_demo');
+    else if (/^\/espace-client/.test(h)) tarreloTrack('espace_client');
+  }, true);
+  document.addEventListener('submit', function (e) {
+    var f = e.target, p = location.pathname;
+    if (/demo/.test(p)) tarreloTrack('demo_envoyee');
+    else if (/newsletter/.test(p)) tarreloTrack('newsletter');
+    else if (/calculateur/.test(p)) tarreloTrack('calculateur');
+    else if (/test-accueil/.test(p)) tarreloTrack('test_accueil');
+  }, true);
+})();
