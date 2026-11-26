@@ -35,7 +35,7 @@
 <link rel="preload" href="/assets/fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
-<link rel="stylesheet" href="/assets/site.css?v=20261123b">
+<link rel="stylesheet" href="/assets/site.css?v=20261126">
 
 <!-- Données structurées -->
 <script type="application/ld+json">
@@ -53,8 +53,26 @@
         "@type": "Person",
         "name": "Elie"
       },
-      "areaServed": {"@type": "Country", "name": "France"},
-      "sameAs": []
+      "areaServed": {
+        "@type": "Country",
+        "name": "France"
+      },
+      "sameAs": [],
+      "telephone": "+33978466369",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+33978466369",
+        "email": "contact@tarrelo.com",
+        "contactType": "customer service",
+        "areaServed": "FR",
+        "availableLanguage": "French"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Issou",
+        "postalCode": "78440",
+        "addressCountry": "FR"
+      }
     },
     {
       "@type": "WebSite",
@@ -241,6 +259,7 @@ html{scroll-behavior:smooth}section[id]{scroll-margin-top:80px}
 <a href="/calculateur" class="nl">Calculateur</a>
 <a href="/demo" class="nl">Démo</a>
 <a href="/ressources" class="nl">Ressources</a>
+<a href="tel:+33978466369" class="hd-tel" aria-label="Appeler Tarrelo au 09 78 46 63 69"><span class="tel-ic" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></span>09 78 46 63 69</a>
 <a href="/espace-client" class="btn" style="border: 1.5px solid #14213D; color: #14213D; min-height: 44px; padding: 0 18px; font-size: 15px">Espace client</a>
 <a href="/tarifs" class="btn" style="background: #FF6B4A; color: #14213D; min-height: 44px; padding: 0 20px; font-size: 15px">Essayer 1 mois offert</a>
 </nav>
@@ -257,6 +276,7 @@ html{scroll-behavior:smooth}section[id]{scroll-margin-top:80px}
 <a href="/tarifs" class="btn" style="background: #FF6B4A; color: #14213D; margin-top: 16px">Essayer 1 mois offert</a>
 <a href="/demo" class="btn" style="border: 1.5px solid #14213D; color: #14213D">Demander la démo</a>
 <a href="/espace-client" class="mnav-l">Espace client</a>
+<a href="tel:+33978466369" class="mnav-l mnav-tel">Appeler le 09 78 46 63 69</a>
 </nav></div>
 </header>
 
@@ -306,7 +326,7 @@ html{scroll-behavior:smooth}section[id]{scroll-margin-top:80px}
 </div>
 <div style="flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 16px 10px; background: #F7F7F7; border-bottom: 0.5px solid #D1D1D6; position: relative">
 <span aria-hidden="true" style="position: absolute; left: 14px; top: 14px; display: flex; align-items: center; gap: 2px; color: #007AFF; font-size: 17px"><svg width="11" height="18" viewBox="0 0 11 18" fill="none" stroke="#007AFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2L2 9l7 7"></path></svg>12</span>
-<div style="width: 50px; height: 50px; border-radius: 50%; background: #14213D; display: flex; align-items: center; justify-content: center"><span style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 800; font-size: 26px; color: #FF6B4A; line-height: 1">o</span></div>
+<img src="/assets/tarrelo-vignette-192.png" width="50" height="50" alt="" style="width: 50px; height: 50px; border-radius: 50%; display: block; box-shadow: 0 1px 3px rgba(0,0,0,.15)">
 <span style="font-size: 12px; color: #000000; display: flex; align-items: center; gap: 3px">Tarrelo <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="#8E8E93" stroke-width="1.6" stroke-linecap="round"><path d="M1 1l4 4-4 4"></path></svg></span>
 </div>
 <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 12px 12px 8px; overflow: hidden">
@@ -549,6 +569,7 @@ el.textContent=(j?j+' j ':'')+h+' h '+(j?'':m+' min');}tick();setInterval(tick,3
 <p style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2A9D8F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M5 12l5 5L20 7"></path></svg>Prise de commandes</p>
 <p style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2A9D8F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M5 12l5 5L20 7"></path></svg>Synchronisation avec votre agenda professionnel</p>
 <p style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2A9D8F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M5 12l5 5L20 7"></path></svg>Prise en compte des données de votre entreprise</p>
+<p style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2A9D8F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M5 12l5 5L20 7"></path></svg>Personnalisation de la voix de votre assistant</p>
 <p style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2A9D8F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M5 12l5 5L20 7"></path></svg>Récaps par e-mail et enregistrements</p>
 <p style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2A9D8F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M5 12l5 5L20 7"></path></svg>Support sous 24 h ouvrées</p>
 </div>
@@ -620,6 +641,7 @@ el.textContent=(j?j+' j ':'')+h+' h '+(j?'':m+' min');}tick();setInterval(tick,3
 <a href="/" aria-label="Tarrelo, accueil" style="text-decoration: none"><span style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -1px; color: #FFF8F1">tarrel<span style="color: #FF6B4A">o</span><svg viewBox="0 0 100 100" fill="none" stroke="#FF6B4A" stroke-linecap="round" aria-hidden="true" style="width: 1em; height: 1em; vertical-align: baseline; overflow: visible; margin-left: -0.62em; margin-right: -0.38em"><path d="M37.9 33.6A40 40 0 0 1 68.6 59.3" stroke-width="7"></path><path d="M44.7 21.8A53 53 0 0 1 79 50.6" stroke-width="5.5" opacity="0.5"></path></svg></span></a>
 <p style="font-size: 14px; line-height: 1.6">Votre téléphone ne sonne plus jamais dans le vide.</p>
 <p style="font-size: 14px"><a href="mailto:contact@tarrelo.com" style="color: #E8DFD3">contact@tarrelo.com</a></p>
+<p style="font-size: 14px"><a href="tel:+33978466369" style="color: #E8DFD3; font-weight: 600">09 78 46 63 69</a></p>
 </div>
 <nav aria-label="Métiers" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px"><p style="font-weight: 700; color: #FFF8F1">Métiers</p><a href="/plombiers" style="color: #E8DFD3; text-decoration: none">Plombiers et chauffagistes</a><a href="/electriciens" style="color: #E8DFD3; text-decoration: none">Électriciens</a><a href="/garages" style="color: #E8DFD3; text-decoration: none">Garages et carrossiers</a><a href="/cabinets-paramedicaux" style="color: #E8DFD3; text-decoration: none">Cabinets paramédicaux</a><a href="/agences-immobilieres" style="color: #E8DFD3; text-decoration: none">Agences immobilières</a><a href="/serruriers" style="color: #E8DFD3; text-decoration: none">Serruriers</a><a href="/peintres" style="color: #E8DFD3; text-decoration: none">Peintres en bâtiment</a><a href="/autres-metiers" style="color: #E8DFD3; text-decoration: none">Autres métiers</a></nav>
 <nav aria-label="Outils" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px"><p style="font-weight: 700; color: #FFF8F1">Outils et ressources</p><a href="/tarifs" style="color: #E8DFD3; text-decoration: none">Tarifs</a><a href="/demo" style="color: #E8DFD3; text-decoration: none">Démo</a><a href="/calculateur" style="color: #E8DFD3; text-decoration: none">Calculateur de pertes</a><a href="/test-accueil" style="color: #E8DFD3; text-decoration: none">Test de votre accueil</a><a href="/comparatif-secretariat" style="color: #E8DFD3; text-decoration: none">Comparatif secrétariat</a><a href="/ressources" style="color: #E8DFD3; text-decoration: none">Guides</a><a href="/newsletter" style="color: #E8DFD3; text-decoration: none">Newsletter</a></nav>

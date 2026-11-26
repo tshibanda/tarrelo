@@ -92,53 +92,68 @@ html{scroll-behavior:smooth}section[id]{scroll-margin-top:80px}
 html{scroll-behavior:smooth}</style>
 <script type="application/ld+json">
 {
- "@context": "https://schema.org",
- "@graph": [
-  {
-   "@type": "BreadcrumbList",
-   "itemListElement": [
+  "@context": "https://schema.org",
+  "@graph": [
     {
-     "@type": "ListItem",
-     "position": 1,
-     "name": "Accueil",
-     "item": "https://tarrelo.com/"
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Accueil",
+          "item": "https://tarrelo.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Ressources",
+          "item": "https://tarrelo.com/ressources"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Combien vous coûte un appel manqué ?",
+          "item": "https://tarrelo.com/ressources/cout-appel-manque"
+        }
+      ]
     },
     {
-     "@type": "ListItem",
-     "position": 2,
-     "name": "Ressources",
-     "item": "https://tarrelo.com/ressources"
-    },
-    {
-     "@type": "ListItem",
-     "position": 3,
-     "name": "Combien vous coûte un appel manqué ?",
-     "item": "https://tarrelo.com/ressources/cout-appel-manque"
+      "@type": "Article",
+      "headline": "Combien vous coûte un appel manqué ?",
+      "description": "La méthode simple pour chiffrer le chiffre d'affaires perdu à cause des appels sans réponse, avec un exemple pas à pas.",
+      "datePublished": "2026-11-21",
+      "dateModified": "2026-11-21",
+      "author": {
+        "@type": "Person",
+        "name": "Elie"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Tarrelo",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://tarrelo.com/assets/tarrelo-logo.png"
+        },
+        "telephone": "+33978466369",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+33978466369",
+          "email": "contact@tarrelo.com",
+          "contactType": "customer service",
+          "areaServed": "FR",
+          "availableLanguage": "French"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Issou",
+          "postalCode": "78440",
+          "addressCountry": "FR"
+        }
+      },
+      "image": "https://tarrelo.com/assets/og-tarrelo.jpg",
+      "mainEntityOfPage": "https://tarrelo.com/ressources/cout-appel-manque"
     }
-   ]
-  },
-  {
-   "@type": "Article",
-   "headline": "Combien vous coûte un appel manqué ?",
-   "description": "La méthode simple pour chiffrer le chiffre d'affaires perdu à cause des appels sans réponse, avec un exemple pas à pas.",
-   "datePublished": "2026-11-21",
-   "dateModified": "2026-11-21",
-   "author": {
-    "@type": "Person",
-    "name": "Elie"
-   },
-   "publisher": {
-    "@type": "Organization",
-    "name": "Tarrelo",
-    "logo": {
-     "@type": "ImageObject",
-     "url": "https://tarrelo.com/assets/tarrelo-logo.png"
-    }
-   },
-   "image": "https://tarrelo.com/assets/og-tarrelo.jpg",
-   "mainEntityOfPage": "https://tarrelo.com/ressources/cout-appel-manque"
-  }
- ]
+  ]
 }
 </script>
 </head>
@@ -161,6 +176,7 @@ html{scroll-behavior:smooth}</style>
 <a href="/calculateur" class="nl">Calculateur</a>
 <a href="/demo" class="nl">Démo</a>
 <a href="/ressources" class="nl">Ressources</a>
+<a href="tel:+33978466369" class="hd-tel" aria-label="Appeler Tarrelo au 09 78 46 63 69"><span class="tel-ic" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></span>09 78 46 63 69</a>
 <a href="/espace-client" class="btn" style="border: 1.5px solid #14213D; color: #14213D; min-height: 44px; padding: 0 18px; font-size: 15px">Espace client</a>
 <a href="/tarifs" class="btn" style="background: #FF6B4A; color: #14213D; min-height: 44px; padding: 0 20px; font-size: 15px">Essayer 1 mois offert</a>
 </nav>
@@ -177,6 +193,7 @@ html{scroll-behavior:smooth}</style>
 <a href="/tarifs" class="btn" style="background: #FF6B4A; color: #14213D; margin-top: 16px">Essayer 1 mois offert</a>
 <a href="/demo" class="btn" style="border: 1.5px solid #14213D; color: #14213D">Demander la démo</a>
 <a href="/espace-client" class="mnav-l">Espace client</a>
+<a href="tel:+33978466369" class="mnav-l mnav-tel">Appeler le 09 78 46 63 69</a>
 </nav></div>
 </header>
 <nav aria-label="Fil d'Ariane" class="wrap crumbs" style="padding-top: 24px"><a href="/">Accueil</a><span aria-hidden="true">›</span><a href="/ressources">Ressources</a><span aria-hidden="true">›</span><span aria-current="page">Combien vous coûte un appel manqué ?</span></nav>
@@ -212,6 +229,7 @@ html{scroll-behavior:smooth}</style>
 <a href="/" aria-label="Tarrelo, accueil" style="text-decoration: none"><span style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -1px; color: #FFF8F1">tarrel<span style="color: #FF6B4A">o</span><svg viewBox="0 0 100 100" fill="none" stroke="#FF6B4A" stroke-linecap="round" aria-hidden="true" style="width: 1em; height: 1em; vertical-align: baseline; overflow: visible; margin-left: -0.62em; margin-right: -0.38em"><path d="M37.9 33.6A40 40 0 0 1 68.6 59.3" stroke-width="7"></path><path d="M44.7 21.8A53 53 0 0 1 79 50.6" stroke-width="5.5" opacity="0.5"></path></svg></span></a>
 <p style="font-size: 14px; line-height: 1.6">Votre téléphone ne sonne plus jamais dans le vide.</p>
 <p style="font-size: 14px"><a href="mailto:contact@tarrelo.com" style="color: #E8DFD3">contact@tarrelo.com</a></p>
+<p style="font-size: 14px"><a href="tel:+33978466369" style="color: #E8DFD3; font-weight: 600">09 78 46 63 69</a></p>
 </div>
 <nav aria-label="Métiers" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px"><p style="font-weight: 700; color: #FFF8F1">Métiers</p><a href="/plombiers" style="color: #E8DFD3; text-decoration: none">Plombiers et chauffagistes</a><a href="/electriciens" style="color: #E8DFD3; text-decoration: none">Électriciens</a><a href="/garages" style="color: #E8DFD3; text-decoration: none">Garages et carrossiers</a><a href="/cabinets-paramedicaux" style="color: #E8DFD3; text-decoration: none">Cabinets paramédicaux</a><a href="/agences-immobilieres" style="color: #E8DFD3; text-decoration: none">Agences immobilières</a><a href="/serruriers" style="color: #E8DFD3; text-decoration: none">Serruriers</a><a href="/peintres" style="color: #E8DFD3; text-decoration: none">Peintres en bâtiment</a><a href="/autres-metiers" style="color: #E8DFD3; text-decoration: none">Autres métiers</a></nav>
 <nav aria-label="Outils" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px"><p style="font-weight: 700; color: #FFF8F1">Outils et ressources</p><a href="/tarifs" style="color: #E8DFD3; text-decoration: none">Tarifs</a><a href="/demo" style="color: #E8DFD3; text-decoration: none">Démo</a><a href="/calculateur" style="color: #E8DFD3; text-decoration: none">Calculateur de pertes</a><a href="/test-accueil" style="color: #E8DFD3; text-decoration: none">Test de votre accueil</a><a href="/comparatif-secretariat" style="color: #E8DFD3; text-decoration: none">Comparatif secrétariat</a><a href="/ressources" style="color: #E8DFD3; text-decoration: none">Guides</a><a href="/newsletter" style="color: #E8DFD3; text-decoration: none">Newsletter</a></nav>

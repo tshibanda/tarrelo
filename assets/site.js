@@ -92,3 +92,36 @@
     else if (/test-accueil/.test(p)) tarreloTrack('test_accueil');
   }, true);
 })();
+
+/* Effets premium : cartes lumineuses, apparition au défilement, téléphone flottant */
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Cartes blanches à coins arrondis
+  document.querySelectorAll('main [style*="background: #FFFFFF"], main .card').forEach(function (el) {
+    var st = el.getAttribute('style') || '';
+    if (/border-radius:\s*(1[2-9]|2\d)px/.test(st) || el.classList.contains('card')) el.classList.add('pc');
+  });
+  document.querySelectorAll('main [style*="border: 1px solid #E8DFD3"]').forEach(function (el) {
+    var st = el.getAttribute('style') || '';
+    if (/border-radius:\s*(1[2-9]|2\d)px/.test(st) && el.offsetWidth > 180) el.classList.add('pc');
+  });
+  // Téléphone de la page d'accueil
+  document.querySelectorAll('main [style*="border-radius: 56px"]').forEach(function (p) { p.classList.add('phone'); if (p.parentElement) p.parentElement.classList.add('phone-wrap'); });
+  // Lumière qui suit la souris
+  if (!reduce) document.addEventListener('pointermove', function (e) {
+    var c = e.target.closest && e.target.closest('.pc'); if (!c) return;
+    var r = c.getBoundingClientRect();
+    c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  }, { passive: true });
+  // Apparition progressive
+  if (reduce || !('IntersectionObserver' in window)) return;
+  var els = [];
+  document.querySelectorAll('main section').forEach(function (sec, i) {
+    if (i === 0) return;
+    var w = sec.querySelector('.wrap') || sec;
+    Array.prototype.slice.call(w.children, 0, 12).forEach(function (el, j) { el.style.setProperty('--d', Math.min(j, 6) * 0.07 + 's'); els.push(el); });
+  });
+  document.querySelectorAll('main .pc').forEach(function (el) { if (els.indexOf(el) < 0) els.push(el); });
+  var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }); }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+  els.forEach(function (el) { if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return; el.classList.add('rv'); io.observe(el); });
+})();

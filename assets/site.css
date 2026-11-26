@@ -101,3 +101,56 @@ details summary:hover{color:#B83A1E}
 @media (max-width:600px){
   #top .hero > div:last-child{transform:scale(.8);transform-origin:top center;margin-bottom:-130px}
 }
+
+/* ================= Couche premium : lumières, profondeur, fluidité ================= */
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+html,body{overflow-x:clip}
+::selection{background:#FF6B4A;color:#14213D}
+body::before{content:"";position:fixed;inset:-25vmax;z-index:-1;pointer-events:none;
+  background:radial-gradient(38vmax 28vmax at 88% 4%,rgba(255,107,74,.22),transparent 62%),
+             radial-gradient(34vmax 30vmax at 2% 34%,rgba(20,33,61,.07),transparent 60%),
+             radial-gradient(30vmax 24vmax at 72% 92%,rgba(255,154,127,.12),transparent 62%);
+  animation:aura 26s ease-in-out infinite alternate}
+@keyframes aura{to{transform:translate3d(-3vmax,2.5vmax,0) scale(1.06)}}
+
+/* En-tête en verre dépoli */
+.site-hd{background:rgba(255,248,241,.74);-webkit-backdrop-filter:saturate(1.7) blur(16px);backdrop-filter:saturate(1.7) blur(16px);border-bottom-color:rgba(232,223,211,.7)}
+.site-hd.scrolled{box-shadow:0 10px 30px -12px rgba(20,33,61,.18)}
+.hd-tel{display:none;align-items:center;gap:7px;font-weight:700;font-size:15px;color:#14213D;text-decoration:none;padding:0 6px;white-space:nowrap;transition:color .2s}
+.hd-tel:hover{color:#B83A1E}.hd-tel .tel-ic{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#FFE9E2;color:#B83A1E}
+@media (min-width:1280px){.hd-tel{display:inline-flex}}
+.mnav-tel{color:#B83A1E!important;font-weight:700}
+
+/* Boutons : dégradé, halo, reflet */
+.btn{position:relative;overflow:hidden;isolation:isolate;transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s,background-color .2s}
+.btn[style*="#FF6B4A"]{background-image:linear-gradient(135deg,#FF8A6B 0%,#FF6B4A 48%,#F2553A 100%)!important;box-shadow:0 12px 26px -12px rgba(242,85,58,.85),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.5) 50%,transparent 70%);transform:translateX(-130%);transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.btn:hover{transform:translateY(-2px)}.btn:hover::after{transform:translateX(130%)}
+.btn[style*="#FF6B4A"]:hover{box-shadow:0 18px 34px -12px rgba(242,85,58,.9),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn:active{transform:translateY(0) scale(.98)}
+.chip{transition:transform .2s,box-shadow .2s,background-color .2s}.chip:hover{transform:translateY(-1px);box-shadow:0 8px 18px -10px rgba(20,33,61,.35)}
+
+/* Cartes : profondeur et lumière qui suit la souris */
+.pc{position:relative;box-shadow:0 1px 2px rgba(20,33,61,.04),0 20px 44px -28px rgba(20,33,61,.3);transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .45s,border-color .45s;background-image:radial-gradient(520px circle at var(--mx,50%) var(--my,-30%),rgba(255,107,74,.09),transparent 42%)}
+.pc:hover{transform:translateY(-5px);box-shadow:0 2px 6px rgba(20,33,61,.05),0 34px 64px -30px rgba(20,33,61,.42);border-color:rgba(255,107,74,.45)!important}
+
+/* Titres : léger dégradé nuit */
+.h1x:not([style*="#FFF8F1"]),.h2x:not([style*="#FFF8F1"]){background:linear-gradient(180deg,#14213D 35%,#2B3C69 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* Téléphone de démonstration : halo et flottement */
+.phone-wrap{position:relative}
+.phone-wrap::before{content:"";position:absolute;left:50%;top:48%;width:820px;height:940px;max-width:none;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(255,107,74,.42),rgba(255,107,74,.16) 52%,transparent 80%);filter:blur(6px);z-index:0;animation:pulse 6s ease-in-out infinite}
+.phone-wrap>.phone{z-index:1;animation:float 7s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-.4deg)}50%{transform:translateY(-12px) rotate(.4deg)}}
+@keyframes pulse{0%,100%{opacity:.85;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}}
+
+/* Apparition au défilement */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
+.rv.in{opacity:1;transform:none}
+
+/* Bandeau Black Friday : reflet animé */
+.bf-banner{background-size:200% 100%!important;animation:bfshine 8s linear infinite}
+@keyframes bfshine{to{background-position:-200% 0}}
+
+:focus-visible{outline:3px solid rgba(255,107,74,.55);outline-offset:3px;border-radius:8px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}html{scroll-behavior:auto}}
