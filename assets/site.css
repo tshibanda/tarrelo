@@ -114,7 +114,8 @@ body::before{content:"";position:fixed;inset:-25vmax;z-index:-1;pointer-events:n
 @keyframes aura{to{transform:translate3d(-3vmax,2.5vmax,0) scale(1.06)}}
 
 /* En-tête en verre dépoli */
-.site-hd{background:rgba(255,248,241,.74);-webkit-backdrop-filter:saturate(1.7) blur(16px);backdrop-filter:saturate(1.7) blur(16px);border-bottom-color:rgba(232,223,211,.7)}
+/* Le flou ne s’applique qu’en grand écran : sur mobile il emprisonnait le menu (position fixe) dans l’en-tête */
+@media (min-width:1024px){.site-hd{background:rgba(255,248,241,.74);-webkit-backdrop-filter:saturate(1.7) blur(16px);backdrop-filter:saturate(1.7) blur(16px);border-bottom-color:rgba(232,223,211,.7)}}
 .site-hd.scrolled{box-shadow:0 10px 30px -12px rgba(20,33,61,.18)}
 .hd-tel{display:none;align-items:center;gap:7px;font-weight:700;font-size:15px;color:#14213D;text-decoration:none;padding:0 6px;white-space:nowrap;transition:color .2s}
 .hd-tel:hover{color:#B83A1E}.hd-tel .tel-ic{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#FFE9E2;color:#B83A1E}
