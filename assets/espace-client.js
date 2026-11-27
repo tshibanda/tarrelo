@@ -38,12 +38,13 @@
     abonnement: '<rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/>',
     factures: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>',
     compte: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    assistant: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
     lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'
   };
   function ico(k, w) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (w ? ' width="' + w + '" height="' + w + '"' : '') + '>' + ICO[k] + '</svg>'; }
 
   var NAV = [
-    ['tdb', 'Tableau de bord', false], ['appels', 'Appels', false], ['rdv', 'Rendez-vous', false],
+    ['tdb', 'Tableau de bord', false], ['assistant', 'Mon assistant', false], ['appels', 'Appels', false], ['rdv', 'Rendez-vous', false],
     ['dossiers', 'Dossiers clients', true], ['commandes', 'Commandes', true], ['stats', 'Statistiques', true],
     ['sep'], ['abonnement', 'Abonnement', false], ['factures', 'Factures et documents', false], ['compte', 'Mon compte', false]
   ];
@@ -69,7 +70,7 @@
       post('compte/oubli', { email: o.email.value.trim() }).catch(function () {}).then(function () { os.hidden = false; os.textContent = 'Si un compte existe pour cette adresse, un lien vient de vous être envoyé (valable 2 heures).'; });
     });
   }
-  function logout() { store(KEY, null); T = null; D = null; document.body.classList.remove('ec-on'); var a = document.getElementById('ec-app'); if (a) a.innerHTML = ''; window.scrollTo(0, 0); }
+  function logout() { store(KEY, null); T = null; D = null; A = null; OPEN = null; FIRST = true; document.body.classList.remove('ec-on'); var a = document.getElementById('ec-app'); if (a) a.innerHTML = ''; window.scrollTo(0, 0); }
 
   // ---------- Chargement ----------
   function start() {
@@ -100,18 +101,19 @@
       + '<div class="foot">Besoin d’aide ?<br><a href="tel:+33978466369">09 78 46 63 69</a><br><a href="mailto:contact@tarrelo.com">contact@tarrelo.com</a><br><br><a href="#" data-act="logout">Se déconnecter</a></div></aside>'
       + '<div><div class="mtop"><img src="/assets/tarrelo-logo.png" alt="Tarrelo"><button class="b ghost sm" data-act="logout">Déconnexion</button></div><div class="main">'
       + (DEMO ? '<div class="demo">Aperçu avec des données fictives (formule ' + (DEMO === 'premium' ? 'Premium' : 'Standard') + '). <a href="/espace-client">Se connecter à mon espace</a></div>' : '')
-      + paneTdb() + paneAppels() + paneRdv() + paneDossiers() + paneCommandes() + paneStats() + paneAbonnement() + paneFactures() + paneCompte()
+      + paneTdb() + '<section class="pane" id="p-assistant">' + head('Mon assistant') + '<div class="skel"></div><div class="skel" style="width:70%"></div></section>' + paneAppels() + paneRdv() + paneDossiers() + paneCommandes() + paneStats() + paneAbonnement() + paneFactures() + paneCompte()
       + '</div></div></div>';
     document.getElementById('ec-app').innerHTML = html;
     document.querySelectorAll('#ec-app .tw table').forEach(function (t) { var h = Array.prototype.map.call(t.querySelectorAll('thead th'), function (x) { return x.textContent; }); t.querySelectorAll('tbody tr').forEach(function (r) { Array.prototype.forEach.call(r.children, function (c, i) { if (h[i] && c.colSpan === 1) c.setAttribute('data-l', h[i]); }); }); });
     bind();
     go(location.hash.slice(1));
+    if (A) paintAssistant(); else loadAssistant();
   }
   function head(t, s, acts) { return '<div class="top"><div><h1>' + t + '</h1>' + (s ? '<p>' + s + '</p>' : '') + '</div>' + (acts ? '<div class="acts">' + acts + '</div>' : '') + '</div>'; }
   function kpi(v, l, s, hi) { return '<div class="k' + (hi ? ' hi' : '') + '"><div class="kl">' + l + '</div><div class="kv">' + v + '</div>' + (s ? '<div class="ks">' + s + '</div>' : '') + '</div>'; }
   function trend(a, b) { if (!b) return a ? '<span class="up">nouveau</span>' : ''; var p = Math.round((a - b) * 100 / b); return '<span class="' + (p >= 0 ? 'up' : 'down') + '">' + (p >= 0 ? '+' : '') + p + ' %</span> vs 30 j précédents'; }
   function vide(t, s) { return '<div class="vide"><strong>' + t + '</strong>' + (s || '') + '</div>'; }
-  function noCalls() { return D.client.assistant_branche ? vide('Aucun appel pour le moment', 'Dès que votre assistant décrochera, chaque appel apparaîtra ici avec son résumé.') : vide('Votre assistant est en cours d’installation', 'Vos appels apparaîtront ici dès sa mise en service. Une question ? Appelez le 09 78 46 63 69.'); }
+  function noCalls() { return D.client.assistant_branche ? vide('Aucun appel pour le moment', 'Dès que votre assistant décrochera, chaque appel apparaîtra ici avec son résumé.') : vide('Votre assistant n’est pas encore branché', 'Terminez la <a href="#assistant">mise en route</a> (renvoi d’appel compris) : vos appels apparaîtront ici dès le premier. Une question ? Appelez le 09 78 46 63 69.'); }
   function upsellBanner() { return premium() || D.plan === 'aucun' ? '' : '<div class="banner"><p>Passez en <strong>Premium</strong> : réécoutez chaque appel, lisez les transcriptions, suivez vos dossiers clients et recevez les récaps par e-mail.</p><button class="b" data-act="upgrade">Découvrir Premium</button></div>'; }
 
   function paneTdb() {
@@ -125,7 +127,7 @@
     var ab = D.abonnement;
     var st = '<div class="card"><h2>Votre assistant</h2><div class="status"><span class="pulse' + (D.client.assistant_branche ? '' : ' off') + '"></span><div><strong>' + (D.client.assistant_branche ? 'En service : il décroche quand vous ne pouvez pas répondre' : 'Installation en cours') + '</strong><div class="m">' + (D.client.assistant_branche ? 'Renvoi d’appel actif sur votre numéro. SMS récap envoyé après chaque appel' + (premium() ? ', récap par e-mail inclus.' : '.') : 'Nous finalisons sa configuration avec vos informations (sous 2 jours ouvrés).') + '</div></div></div>'
       + (ab ? '<p class="m" style="margin-top:14px">Formule <strong>' + (ab.formule === 'premium' ? 'Premium' : 'Standard') + '</strong> · ' + esc(ab.statut_lib) + (ab.fin_periode ? ' · prochaine échéance le ' + fdate(ab.fin_periode) : '') + '</p>' : '') + '</div>';
-    var list = todo.length ? '<ul class="todo">' + todo.map(function (x) { return '<li><span class="dot' + (x.urgent ? ' u' : '') + '"></span><div class="tx"><strong>' + esc(x.nom || 'Appelant') + ' · ' + tel(x.appelant) + '</strong><span class="m">' + fdt(x.quand) + '</span><div>' + esc(x.resume) + '</div></div>' + motif(x.motif) + '</li>'; }).join('') + '</ul>' : (ap.length ? vide('Tout est à jour', 'Aucun appel en attente de traitement.') : noCalls());
+    var list = todo.length ? '<ul class="todo">' + todo.map(function (x) { return '<li><span class="dot' + (x.urgent ? ' u' : '') + '"></span><div class="tx"><strong>' + esc(x.nom || 'Appelant') + ' · ' + tel(x.appelant) + '</strong><span class="m">' + fdt(x.quand) + '</span><div>' + esc(x.resume) + '</div>' + (premium() && x.audio ? '<div class="aud" style="margin-top:8px"><button class="b ghost sm" data-audio="' + esc(x.audio) + '">▶ Écouter l’appel</button></div>' : '') + '</div>' + motif(x.motif) + '</li>'; }).join('') + '</ul>' : (ap.length ? vide('Tout est à jour', 'Aucun appel en attente de traitement.') : noCalls());
     return '<section class="pane" id="p-tdb">' + head('Bonjour' + (D.client.nom ? ' ' + esc(String(D.client.nom).split(' ')[0]) : '') + ' 👋', 'Voici comment se passent vos appels.', '<a class="b ghost" href="#appels" data-go="appels">Voir tous les appels</a>')
       + upsellBanner()
       + '<div class="grid">' + kpi(nb(a30.length), 'Appels décrochés', '30 derniers jours · ' + trend(a30.length, p30.length), true) + kpi(nb(rap.length), 'À rappeler', rap.length ? 'Clients qui attendent un retour' : 'Rien en attente') + kpi(nb(rdv), 'Demandes de RDV', '30 derniers jours') + kpi(nb(urg), 'Urgences', '30 derniers jours') + kpi(nb(hors), 'Hors heures ouvrées', 'Soir, nuit et week-end') + kpi(dur(moy), 'Durée moyenne', 'par appel') + '</div>'
@@ -141,7 +143,7 @@
     return '<svg class="chart" viewBox="0 0 100 40" preserveAspectRatio="none" role="img" aria-label="Appels par jour">' + days.map(function (x, i) { var h = x.n / max * 36; return '<g><title>' + x.l.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) + ' : ' + x.n + ' appel(s)</title><rect x="' + (i * w + w * .15) + '" y="' + (40 - h) + '" width="' + (w * .7) + '" height="' + h + '" rx=".6" class="bu"/></g>'; }).join('') + '</svg><div class="axe"><span>il y a 30 jours</span><span>aujourd’hui</span></div>';
   }
   function rowAppel(x) {
-    var ecoute = premium() ? (x.audio ? '<button class="b ghost sm" data-audio="' + esc(x.audio) + '">▶ Écouter</button>' : '<span class="m">—</span>') + (x.transcript ? '<details><summary>Transcription</summary><div class="det">' + esc(x.transcript) + '</div></details>' : '') : '<button class="lock" data-act="upgrade" title="Réservé à la formule Premium">' + ico('lock', 13) + ' Écoute et transcription</button>';
+    var ecoute = premium() ? (x.audio ? '<div class="aud"><button class="b sm" data-audio="' + esc(x.audio) + '">▶ Écouter</button> <a class="b ghost sm" href="' + esc(x.audio) + '&dl=1" download="appel-' + esc(String(x.quand).slice(0, 10)) + '.mp3" title="Télécharger l’enregistrement (MP3)">⬇ MP3</a></div>' : '<span class="m">Enregistrement indisponible</span>') + (x.transcript ? '<details><summary>Transcription</summary><div class="det">' + esc(x.transcript) + '</div></details>' : '') : '<button class="lock" data-act="upgrade" title="Réservé à la formule Premium">' + ico('lock', 13) + ' Écoute et transcription</button>';
     var sel = '<select data-statut="' + x.id + '" aria-label="Statut">' + Object.keys(STATUTS).map(function (k) { return '<option value="' + k + '"' + (x.statut === k ? ' selected' : '') + '>' + STATUTS[k] + '</option>'; }).join('') + '</select>';
     return '<tr data-m="' + esc(x.motif) + '" data-s="' + esc(x.statut) + '" data-q="' + esc(x.quand) + '"><td><strong>' + fdt(x.quand) + '</strong><br><span class="m">' + dur(x.duree_s) + '</span></td><td><strong>' + esc(x.nom || 'Appelant') + '</strong><br>' + tel(x.appelant) + '</td><td>' + motif(x.motif) + (x.urgent ? ' <span class="bd ko">Urgent</span>' : '') + '</td><td class="res">' + esc(x.resume) + (x.rdv ? '<div class="m" style="margin-top:4px"><strong>RDV :</strong> ' + esc(x.rdv) + '</div>' : '') + '</td><td>' + ecoute + '</td><td>' + sel + '</td></tr>';
   }
@@ -224,14 +226,166 @@
   function paneCompte() {
     var c = D.client;
     return '<section class="pane" id="p-compte">' + head('Mon compte')
-      + '<div class="two"><div class="card"><h2>Mes informations</h2><dl class="kv2"><dt>Nom</dt><dd>' + esc(c.nom || '—') + '</dd><dt>Entreprise</dt><dd>' + esc(c.entreprise || '—') + '</dd><dt>E-mail de connexion</dt><dd>' + esc(c.email) + '</dd><dt>Mobile pour les SMS</dt><dd>' + esc(c.telephone || '—') + '</dd><dt>Formule</dt><dd>' + (D.plan === 'premium' ? 'Premium' : D.plan === 'standard' ? 'Standard' : '—') + '</dd></dl><p class="m" style="margin-top:14px">Pour modifier ces informations ou les réglages de votre assistant (horaires, prestations, message d’accueil), répondez à n’importe quel e-mail Tarrelo ou appelez le 09 78 46 63 69.</p></div>'
+      + '<div class="two"><div class="card"><h2>Mes informations</h2><dl class="kv2"><dt>Nom</dt><dd>' + esc(c.nom || '—') + '</dd><dt>Entreprise</dt><dd>' + esc(c.entreprise || '—') + '</dd><dt>E-mail de connexion</dt><dd>' + esc(c.email) + '</dd><dt>Mobile pour les SMS</dt><dd>' + esc(c.telephone || '—') + '</dd><dt>Formule</dt><dd>' + (D.plan === 'premium' ? 'Premium' : D.plan === 'standard' ? 'Standard' : '—') + '</dd></dl><p class="m" style="margin-top:14px">Les réglages de votre assistant (horaires, prestations, voix, transfert, message d’accueil) se modifient dans <a href="#assistant">Mon assistant</a>.</p></div>'
       + '<div class="card"><h2>Sécurité</h2><p class="m" style="font-size:14px;margin-bottom:12px">Pour changer de mot de passe, recevez un lien sécurisé sur votre e-mail de connexion.</p><button class="b ghost" data-act="mdp">Changer mon mot de passe</button><div class="sep" style="height:1px;background:#F0E8DD;margin:18px 0"></div><button class="b danger" data-act="logout">Se déconnecter</button></div></div>'
       + '<div class="card"><h2>Support</h2><p style="font-size:14px">' + (premium() ? 'Formule Premium : <strong>réponse sous 24 h ouvrées</strong> garantie.' : 'Nous répondons au plus vite, du lundi au vendredi. Les clients Premium bénéficient d’une réponse sous 24 h ouvrées.') + '</p><p style="margin-top:10px"><a class="b ghost sm" href="mailto:contact@tarrelo.com">contact@tarrelo.com</a> <a class="b ghost sm" href="tel:+33978466369">09 78 46 63 69</a></p></div></section>';
   }
 
+  // ---------- Mon assistant (mise en route + personnalisation) ----------
+  var A = null, OPEN = null, FIRST = true;
+  var ETAPES_TXT = {
+    entreprise: 'Ce que votre assistant doit savoir pour répondre à vos clients.',
+    assistant: 'Son prénom, sa voix et sa façon de se présenter.',
+    transfert: 'Le numéro vers lequel transférer les vraies urgences.',
+    ligne: 'Votre numéro professionnel et le renvoi vers l’assistant.',
+    test: 'Un appel de contrôle pour vérifier que tout fonctionne.'
+  };
+  function aPost(data) {
+    if (DEMO) return Promise.resolve(demoSave(data));
+    data.t = T; return post('ec/assistant', data);
+  }
+  function loadAssistant() {
+    if (DEMO) { A = demoAssistant(DEMO); paintAssistant(); return; }
+    post('ec/assistant', { t: T, action: 'lire' }).then(function (j) {
+      if (j && j.auth === false) { logout(); return; }
+      if (j && j.ok) { A = j; paintAssistant(); } else paintAssistant('Impossible de charger les réglages de votre assistant. Réessayez dans un instant.');
+    }).catch(function () { paintAssistant('Connexion impossible. Réessayez dans un instant.'); });
+  }
+  function nbFaits() { return A ? A.etapes.filter(function (e) { return e.fait; }).length : 0; }
+  function paintAssistant(erreur) {
+    var p = document.getElementById('p-assistant'); if (!p) return;
+    if (erreur) { p.innerHTML = head('Mon assistant') + '<div class="card">' + vide('Réglages indisponibles', erreur) + '</div>'; return; }
+    p.innerHTML = paneAssistantBody();
+    var n = nbFaits(), em = document.querySelector('#ec-app a.nav[data-p="assistant"] em');
+    if (em) em.remove();
+    var nv = document.querySelector('#ec-app a.nav[data-p="assistant"]');
+    if (nv && n < 5) nv.insertAdjacentHTML('beforeend', '<em>' + n + '/5</em>');
+    var tdb = document.querySelector('#p-tdb .top'), old = document.getElementById('ec-onb');
+    if (old) old.remove();
+    if (tdb && n < 5) tdb.insertAdjacentHTML('afterend', '<div class="banner" id="ec-onb"><p><strong>Mise en route : ' + n + '/5 étapes.</strong> Terminez la configuration de votre assistant pour qu’il décroche à votre place.</p><button class="b" data-go="assistant">' + (n ? 'Continuer' : 'Commencer') + '</button></div>');
+    if (FIRST) { FIRST = false; if (n < 5 && !location.hash) location.hash = 'assistant'; }
+  }
+  function fld(lbl, html, aide) { return '<label class="fld"><span>' + lbl + '</span>' + html + (aide ? '<small>' + aide + '</small>' : '') + '</label>'; }
+  function inp(name, v, ph, type) { return '<input name="' + name + '" type="' + (type || 'text') + '" value="' + esc(v || '') + '" placeholder="' + esc(ph || '') + '">'; }
+  function ta(name, v, ph, r) { return '<textarea name="' + name + '" rows="' + (r || 3) + '" placeholder="' + esc(ph || '') + '">' + esc(v || '') + '</textarea>'; }
+  function sel(name, v, opts) { return '<select name="' + name + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (v === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>'; }
+  function lisible(p) { var m = String(p || '').replace('+33', '0'); return m.replace(/(..)(?=.)/g, '$1 '); }
+  function formEtape(id) {
+    var c = A.config || {}, P = A.plan === 'premium';
+    if (id === 'entreprise') return '<form data-sec="entreprise"><div class="fg">'
+      + fld('Nom de l’entreprise *', inp('entreprise', c.entreprise, 'Plomberie Dupont'))
+      + fld('Votre métier *', inp('metier', c.metier, 'Plombier chauffagiste'))
+      + fld('Zone d’intervention', inp('zone', c.zone, 'Mantes-la-Jolie et 20 km autour'))
+      + fld('Adresse (si vous recevez du public)', inp('adresse', c.adresse, '12 rue de la Gare, 78200 Mantes-la-Jolie'))
+      + fld('Horaires', inp('horaires', c.horaires, 'Du lundi au vendredi, 8 h – 18 h'))
+      + fld('Mobile pour recevoir les SMS récap', inp('mobile_sms', c.mobile_sms ? lisible(c.mobile_sms) : '', '06 12 34 56 78', 'tel'), 'Après chaque appel, vous recevez un SMS avec le résumé.')
+      + '</div>' + fld('Prestations et services', ta('prestations', c.prestations, 'Dépannage, entretien de chaudière, remplacement de ballon d’eau chaude…', 3))
+      + fld('Tarifs que l’assistant peut annoncer', ta('tarifs', c.tarifs, 'Déplacement 49 € dans la zone. Devis gratuit.', 2), 'Laissez vide si vous préférez que l’assistant ne parle jamais de prix.')
+      + fld('Autres informations utiles', ta('infos', c.infos, 'Délais habituels, marques, moyens de paiement, ce qu’il ne faut pas promettre…', 4))
+      + '<div class="fa"><button class="b">Enregistrer et continuer</button></div></form>';
+    if (id === 'assistant') return '<form data-sec="assistant"><div class="fg">'
+      + fld('Prénom de l’assistant *', inp('prenom', c.prenom, 'Léa'))
+      + fld('Ton', sel('ton', c.ton || 'chaleureux', [['chaleureux', 'Chaleureux et proche'], ['professionnel', 'Professionnel et posé'], ['dynamique', 'Dynamique et souriant']]))
+      + '</div>' + fld('Phrase d’accueil', ta('accueil', c.accueil, 'Laissez vide : « Bonjour, ' + (c.entreprise || 'votre entreprise') + ', je suis ' + (c.prenom || 'Léa') + ', l’assistante virtuelle. Que puis-je faire pour vous ? »', 2))
+      + '<div class="fld"><span>Voix</span><div class="vx">' + A.voix.map(function (v) {
+        return '<label class="v' + (v.ok ? '' : ' lk') + '"><input type="radio" name="voix" value="' + v.id + '"' + (c.voix === v.id ? ' checked' : '') + (v.ok ? '' : ' disabled') + '><span class="vn">' + esc(v.nom) + (v.plan === 'premium' ? ' <em>PREMIUM</em>' : '') + '</span><span class="m">' + esc(v.desc) + '</span>' + (v.ex ? '<button type="button" class="b ghost sm" data-ex="' + esc(v.ex) + '">▶ Écouter</button>' : '') + '</label>';
+      }).join('') + '</div>' + (P ? '' : '<small>Les 7 voix supplémentaires sont incluses dans Premium. <a href="#" data-act="upgrade">Passer en Premium</a></small>') + '</div>'
+      + fld('Débit de parole' + (P ? '' : ' <em class="pk">PREMIUM</em>'), '<input type="range" name="vitesse" min="0.85" max="1.15" step="0.05" value="' + (c.vitesse || 1) + '"' + (P ? '' : ' disabled') + '>', 'Plus lent à gauche, plus rapide à droite.')
+      + '<div class="fa"><button class="b">Enregistrer et continuer</button></div></form>';
+    if (id === 'transfert') return '<form data-sec="transfert"><div class="fg">'
+      + fld('Numéro de transfert', inp('transfert_num', c.transfert_num ? lisible(c.transfert_num) : '', '06 12 34 56 78', 'tel'), 'Votre mobile personnel ou celui de l’associé d’astreinte. Il doit être différent de votre ligne pro.')
+      + fld('Quand transférer ?', sel('transfert_quand', c.transfert_quand || 'urgences', [['urgences', 'Uniquement les vraies urgences'], ['demande', 'Urgences et quand l’appelant le demande'], ['jamais', 'Jamais : prendre le message']]))
+      + '</div>' + fld('Ce que vous considérez comme une urgence', ta('urgences', c.urgences, 'Fuite d’eau importante, plus de chauffage chez une personne âgée, porte claquée…', 3))
+      + '<div class="fa"><button class="b">Enregistrer et continuer</button></div></form>';
+    if (id === 'ligne') {
+      var num = A.numero_assistant, nl = A.numero_lisible, nn = String(num || '').replace('+33', '0');
+      var codes = num ? '<div class="codes"><h4>Activez le renvoi depuis votre ligne</h4><p class="m">Composez ces codes depuis le téléphone de votre ligne pro, puis appuyez sur Appeler.</p><table><tbody>'
+        + '<tr><td><strong>Recommandé</strong> : si vous ne décrochez pas (après ~20 s)</td><td><code>**61*' + nn + '**20#</code></td></tr>'
+        + '<tr><td>Si vous êtes déjà en ligne</td><td><code>**67*' + nn + '#</code></td></tr>'
+        + '<tr><td>Si votre téléphone est éteint ou sans réseau</td><td><code>**62*' + nn + '#</code></td></tr>'
+        + '<tr><td>Tous les appels, sans faire sonner votre téléphone</td><td><code>**21*' + nn + '#</code></td></tr>'
+        + '<tr><td>Désactiver tous les renvois</td><td><code>##002#</code></td></tr></tbody></table>'
+        + '<p class="m">Ligne fixe ou box : le renvoi s’active depuis votre espace opérateur ou avec les codes de votre opérateur. <a href="/ressources/renvoi-appel" target="_blank" rel="noopener">Guide pas à pas par opérateur</a>.</p></div>'
+        : '<div class="warn">' + (c.ligne_pro ? 'Le numéro de votre assistant est en cours d’attribution. Il s’affichera ici avec les codes de renvoi à composer.' : 'Indiquez votre ligne pro : le numéro de votre assistant vous sera ensuite attribué.') + '</div>';
+      return '<form data-sec="ligne">' + (num ? '<div class="nasst"><span class="m">Numéro de votre assistant</span><strong>' + esc(nl) + '</strong></div>' : '') + '<div class="fg">'
+        + fld('Votre numéro professionnel *', inp('ligne_pro', c.ligne_pro ? lisible(c.ligne_pro) : '', '06 12 34 56 78 ou 01 23 45 67 89', 'tel'), 'Le numéro que vos clients appellent. Il ne change pas.')
+        + fld('Type de ligne', sel('ligne_type', c.ligne_type || 'mobile', [['mobile', 'Mobile'], ['fixe', 'Fixe / box']]))
+        + fld('Opérateur', sel('operateur', c.operateur || '', [['', 'Choisir…'], ['Orange', 'Orange / Sosh'], ['SFR', 'SFR / RED'], ['Bouygues', 'Bouygues Telecom / B&You'], ['Free', 'Free'], ['Autre', 'Autre']]))
+        + '</div>' + codes + '<div class="fa"><button class="b">' + (num ? 'J’ai activé le renvoi' : 'Enregistrer') + '</button></div></form>';
+    }
+    if (id === 'test') {
+      var dejaLigne = A.etapes.filter(function (e) { return e.id === 'ligne'; })[0].fait;
+      return '<form data-sec="test"><ol class="ol"><li>Depuis un autre téléphone, appelez votre ligne pro' + (A.config.ligne_pro ? ' (' + esc(lisible(A.config.ligne_pro)) + ')' : '') + '.</li><li>Ne décrochez pas : votre assistant prend l’appel et se présente.</li><li>Faites une demande comme un client (rendez-vous, devis…), puis raccrochez.</li><li>Vous recevez le SMS récap et l’appel apparaît dans l’onglet Appels.</li></ol>'
+        + (dejaLigne ? '' : '<p class="warn">Terminez d’abord l’étape « Votre ligne ».</p>')
+        + '<p class="m">Un souci ? Appelez-nous au <a href="tel:+33978466369">09 78 46 63 69</a>, nous vérifions avec vous.</p><div class="fa"><button class="b"' + (dejaLigne ? '' : ' disabled') + '>Mon assistant a bien décroché</button></div></form>';
+    }
+    return '';
+  }
+  function paneKb() {
+    var P = A.plan === 'premium', kb = A.kb || [];
+    if (!P) return '<div class="card kbx"><h2>Connaissances <em class="pk">PREMIUM</em></h2><p>Avec Premium, votre assistant apprend votre site internet et vos documents (tarifs, catalogue, FAQ, conditions) pour répondre précisément à vos clients.</p><button class="b" data-act="upgrade">Passer en Premium</button></div>';
+    return '<div class="card kbx"><h2>Connaissances</h2><p class="m">Votre assistant apprend ces sources et s’en sert pour répondre. Il n’invente rien de ce qui n’y figure pas. 10 sources maximum.</p>'
+      + (kb.length ? '<ul class="kbl">' + kb.map(function (k) { return '<li><span class="bd">' + (k.type === 'url' ? 'Site' : 'Fichier') + '</span><strong>' + esc(k.name) + '</strong><span class="m">' + esc(k.source || '') + '</span><button class="b danger sm" data-kbdel="' + esc(k.id) + '">Retirer</button></li>'; }).join('') + '</ul>' : '<p class="vide" style="padding:14px">Aucune source pour l’instant.</p>')
+      + '<div class="two"><form data-kb="url">' + fld('Ajouter une page de votre site', inp('url', A.config.site_web || '', 'https://www.monentreprise.fr/tarifs', 'url'), 'Une adresse par page (accueil, tarifs, FAQ…).') + '<button class="b ghost">Apprendre cette page</button></form>'
+      + '<form data-kb="fichier">' + fld('Ajouter un document', '<input type="file" name="f" accept=".pdf,.docx,.txt,.md,.html,.epub">', 'PDF, Word ou texte, 8 Mo maximum.') + '<button class="b ghost">Apprendre ce document</button></form></div></div>';
+  }
+  function paneAssistantBody() {
+    var n = nbFaits(), cur = OPEN || (A.etapes.filter(function (e) { return !e.fait; })[0] || {}).id;
+    var steps = A.etapes.map(function (e, i) {
+      var on = e.id === cur;
+      return '<div class="stp' + (e.fait ? ' ok' : '') + (on ? ' open' : '') + '" data-s="' + e.id + '"><button type="button" class="sh" data-step="' + e.id + '"><span class="sn">' + (e.fait ? '✓' : i + 1) + '</span><span class="st"><strong>' + e.titre + '</strong><span class="m">' + ETAPES_TXT[e.id] + '</span></span><span class="se">' + (e.fait ? 'Fait · modifier' : (on ? '' : 'À faire')) + '</span></button>' + (on ? '<div class="sb">' + formEtape(e.id) + '</div>' : '') + '</div>';
+    }).join('');
+    var intro = n < 5 ? '<div class="onb"><div><h2>Mise en route de votre assistant</h2><p>Cinq étapes, une dizaine de minutes. Chaque enregistrement met votre assistant à jour immédiatement.</p></div><div class="pg"><div class="pgb"><span style="width:' + (n * 20) + '%"></span></div><span>' + n + '/5</span></div></div>' : '<div class="okb">✓ Votre assistant est configuré et en service. Modifiez n’importe quel réglage ci-dessous : la mise à jour est immédiate.</div>';
+    return head('Mon assistant', 'Personnalisez votre assistant vous-même, à tout moment.') + intro + '<div class="stps">' + steps + '</div>' + paneKb();
+  }
+  function formData(f) { var o = {}; Array.prototype.forEach.call(f.elements, function (el) { if (!el.name || el.disabled) return; if (el.type === 'radio' && !el.checked) return; o[el.name] = el.value; }); return o; }
+  function saveEtape(f) {
+    var b = f.querySelector('button.b:not([type=button])'), sec = f.dataset.sec, lab = b.textContent;
+    b.disabled = true; b.textContent = 'Mise à jour de l’assistant…';
+    aPost({ action: 'enregistrer', section: sec, data: JSON.stringify(formData(f)) }).then(function (j) {
+      if (j && j.auth === false) { logout(); return; }
+      if (!j || !j.ok) { b.disabled = false; b.textContent = lab; if (j && j.premium) { ACT.upgrade(); return; } toast((j && j.error) || 'Enregistrement impossible, réessayez.', true); return; }
+      A = j; var nx = A.etapes.filter(function (e) { return !e.fait; })[0];
+      OPEN = sec === 'ligne' && !A.numero_assistant ? 'ligne' : (nx ? nx.id : null);
+      paintAssistant(); toast(j.message || 'Enregistré.');
+      var o = document.querySelector('#p-assistant .stp.open'); if (o) o.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(function () { b.disabled = false; b.textContent = lab; toast('Connexion impossible. Réessayez.', true); });
+  }
+  function kbDone(b, lab) { return function (j) { if (b) { b.disabled = false; b.textContent = lab; } if (j && j.auth === false) { logout(); return; } if (!j || !j.ok) { if (j && j.premium) { ACT.upgrade(); return; } toast((j && j.error) || 'Opération impossible.', true); return; } A.kb = j.kb; paintAssistant(); toast(j.message); }; }
+  function saveKb(f) {
+    var b = f.querySelector('button'), lab = b.textContent;
+    if (f.dataset.kb === 'url') { var u = f.url.value.trim(); if (!u) return; b.disabled = true; b.textContent = 'Lecture de la page…'; aPost({ action: 'kb_url', url: u }).then(kbDone(b, lab)).catch(function () { kbDone(b, lab)(null); }); return; }
+    var file = f.f.files[0]; if (!file) { toast('Choisissez un fichier.', true); return; }
+    if (file.size > 8 * 1024 * 1024) { toast('Fichier trop lourd (8 Mo maximum).', true); return; }
+    b.disabled = true; b.textContent = 'Lecture du document…';
+    var r = new FileReader();
+    r.onload = function () { var s = String(r.result), i = s.indexOf(','); aPost({ action: 'kb_fichier', nom: file.name, mime: file.type || 'application/octet-stream', fichier: s.slice(i + 1) }).then(kbDone(b, lab)).catch(function () { kbDone(b, lab)(null); }); };
+    r.readAsDataURL(file);
+  }
+  function bindAssistant(app) {
+    app.addEventListener('submit', function (e) {
+      var f = e.target; if (!f.closest('#p-assistant')) return; e.preventDefault();
+      if (f.dataset.sec) saveEtape(f); else if (f.dataset.kb) saveKb(f);
+    });
+    app.addEventListener('click', function (e) {
+      var s = e.target.closest('[data-step]'); if (s) { e.preventDefault(); OPEN = s.closest('.stp').classList.contains('open') ? '__' : s.dataset.step; paintAssistant(); return; }
+      var x = e.target.closest('[data-ex]'); if (x) { e.preventDefault(); document.querySelectorAll('#ec-app audio').forEach(function (o) { o.pause(); }); var au = new Audio(x.dataset.ex); au.play().catch(function () {}); x.textContent = '♪ Lecture…'; au.addEventListener('ended', function () { x.textContent = '▶ Écouter'; }); return; }
+      var k = e.target.closest('[data-kbdel]'); if (k) { e.preventDefault(); modal('<h3>Retirer cette source ?</h3><p>Votre assistant ne s’en servira plus pour répondre.</p>', function (done) { aPost({ action: 'kb_supprimer', id: k.dataset.kbdel }).then(function (j) { done(); kbDone(null)(j); }).catch(function () { done('Connexion impossible.'); }); }, 'Retirer', true); }
+    });
+  }
+  function demoAssistant(plan) {
+    var V = [['HuLbOdhRlvQQN8oPP0AJ', 'Claire', 'f', 'Calme et professionnelle', 'standard'], ['M8xXPW1xIZVqZLxYby5T', 'Jean', 'm', 'Posé et rassurant', 'standard'], ['YxrwjAKoUKULGd0g8K9Y', 'Lucie', 'f', 'Empathique, relation client', 'premium'], ['3C1zYzXNXNzrB66ON8rj', 'Jade', 'f', 'Claire et structurée', 'premium'], ['d3AXX0BlgJHYFCuH9X88', 'Émilie', 'f', 'Chaleureuse et naturelle', 'premium'], ['uOw88F5bjqRiVuZLhXEA', 'Victoria', 'f', 'Douce et rassurante', 'premium'], ['kENkNtk0xyzG09WW40xE', 'Marcel', 'm', 'Chaleureux, proche', 'premium'], ['zlP1wgh6FsmMZswaDa2M', 'Julien', 'm', 'Calme et aimable', 'premium'], ['1EmYoP3UnnnwhlJKovEy', 'Anthony', 'm', 'Franc et énergique', 'premium']];
+    return { ok: true, plan: plan, config: { entreprise: 'Plomberie Dupont', metier: 'Plombier chauffagiste', zone: 'Mantes-la-Jolie et 20 km autour', mobile_sms: '+33612345678', prenom: 'Léa', ton: 'chaleureux', voix: 'HuLbOdhRlvQQN8oPP0AJ', vitesse: 1, transfert_quand: 'urgences', ligne_type: 'mobile', faites: ['entreprise'] }, kb: plan === 'premium' ? [{ id: 'demo1', name: 'plomberie-dupont.fr', type: 'url', source: 'https://plomberie-dupont.fr' }] : [], numero_assistant: '+33159000000', numero_lisible: '01 59 00 00 00', agent: true, etapes: [{ id: 'entreprise', titre: 'Votre entreprise', fait: true }, { id: 'assistant', titre: 'Votre assistant', fait: false }, { id: 'transfert', titre: 'Urgences et transfert', fait: false }, { id: 'ligne', titre: 'Votre ligne', fait: false }, { id: 'test', titre: 'Premier appel test', fait: false }], voix: V.map(function (v) { return { id: v[0], nom: v[1], genre: v[2], desc: v[3], plan: v[4], ex: '', ok: plan === 'premium' || v[4] === 'standard' }; }) };
+  }
+  function demoSave(d) {
+    if (d.action === 'enregistrer') { A.etapes.forEach(function (e) { if (e.id === d.section) e.fait = true; }); var o = JSON.parse(d.data || '{}'); Object.keys(o).forEach(function (k) { A.config[k] = o[k]; }); return Object.assign({}, A, { message: 'Aperçu : votre assistant serait mis à jour immédiatement.' }); }
+    if (d.action === 'kb_supprimer') return { ok: true, kb: A.kb.filter(function (k) { return k.id !== d.id; }), message: 'Aperçu : source retirée.' };
+    return { ok: true, kb: A.kb.concat([{ id: 'demo' + Date.now(), name: d.nom || d.url, type: d.url ? 'url' : 'file', source: d.url || d.nom }]), message: 'Aperçu : votre assistant apprendrait cette source.' };
+  }
+
   // ---------- Interactions ----------
   function go(id) {
-    var ok = ['tdb', 'appels', 'rdv', 'dossiers', 'commandes', 'stats', 'abonnement', 'factures', 'compte'];
+    var ok = ['tdb', 'assistant', 'appels', 'rdv', 'dossiers', 'commandes', 'stats', 'abonnement', 'factures', 'compte'];
     if (ok.indexOf(id) < 0) id = 'tdb';
     document.querySelectorAll('#ec-app a.nav').forEach(function (a) { a.classList.toggle('on', a.dataset.p === id); });
     document.querySelectorAll('#ec-app section.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + id); });
@@ -299,12 +453,16 @@
   };
   function bind() {
     var app = document.getElementById('ec-app');
+    if (app.dataset.b) return; app.dataset.b = '1';
+    bindAssistant(app);
     app.addEventListener('click', function (e) {
       var a = e.target.closest('[data-act]');
       if (a) { e.preventDefault(); var m = document.querySelector('#ec-app .modal'); if (m && a.dataset.act !== 'upgrade' && !a.closest('.modal')) m.remove(); if (m && a.closest('.modal')) m.remove(); ACT[a.dataset.act] && ACT[a.dataset.act](a); return; }
       var g = e.target.closest('[data-go]'); if (g) { e.preventDefault(); location.hash = g.dataset.go; return; }
       var au = e.target.closest('[data-audio]');
-      if (au) { var el = document.createElement('audio'); el.controls = true; el.preload = 'auto'; el.src = au.dataset.audio; el.addEventListener('error', function () { toast('Enregistrement indisponible pour le moment.', true); }); au.replaceWith(el); el.play().catch(function () {}); }
+      if (au && au.dataset.audio === 'demo') { toast('Aperçu : ici, vous écoutez l’enregistrement réel de chaque appel.'); return; }
+      var dla = e.target.closest('a[href^="demo"]'); if (dla) { e.preventDefault(); toast('Aperçu : téléchargement de l’enregistrement en MP3.'); return; }
+      if (au) { var el = document.createElement('audio'); el.controls = true; el.preload = 'auto'; el.src = au.dataset.audio; el.addEventListener('error', function () { toast('Enregistrement indisponible pour le moment.', true); }); document.querySelectorAll('#ec-app audio').forEach(function (o) { o.pause(); }); el.addEventListener('play', function () { document.querySelectorAll('#ec-app audio').forEach(function (o) { if (o !== el) o.pause(); }); }); au.replaceWith(el); el.play().catch(function () {}); }
     });
     app.addEventListener('input', function (e) { var id = e.target.dataset.filter; if (id) filterTable(id); });
     app.addEventListener('change', function (e) {
@@ -327,7 +485,7 @@
     var mot = ['rdv', 'devis', 'urgence', 'information', 'rdv', 'devis', 'commande', 'autre', 'rdv', 'rappel'];
     var res = { rdv: 'Souhaite un rendez-vous pour l’entretien annuel de sa chaudière. Disponible en semaine après 17 h.', devis: 'Demande un devis pour le remplacement d’un ballon d’eau chaude de 200 L, maison à Mantes-la-Jolie.', urgence: 'Fuite importante sous l’évier, eau coupée au compteur. Demande une intervention rapide.', information: 'Demande les horaires d’ouverture et si vous intervenez à Poissy.', commande: 'Commande deux mitigeurs thermostatiques, retrait en magasin vendredi.', autre: 'Démarchage commercial, aucune suite à donner.', rappel: 'Rappelle au sujet du devis envoyé la semaine dernière, souhaite être recontacté.' };
     var appels = [];
-    for (var i = 0; i < 46; i++) { var m = mot[i % 10], q = new Date(now - (i * 15.5 + (i % 3) * 4) * H); appels.push({ id: i + 1, quand: q.toISOString(), appelant: '06 1' + (i % 10) + ' 4' + (i % 7) + ' 2' + (i % 5) + ' 8' + (i % 9), nom: noms[i % 10], motif: m, resume: res[m], rdv: m === 'rdv' ? ['Mardi 14 h', 'Jeudi matin', 'Lundi 17 h 30'][i % 3] : '', urgent: m === 'urgence', duree_s: 70 + (i * 37) % 240, statut: i < 3 ? 'a_rappeler' : (i < 6 ? 'nouveau' : 'traite'), transcript: plan === 'premium' ? 'Assistant : Bonjour, Plomberie Dupont, je suis Léa, l’assistante virtuelle. Que puis-je faire pour vous ?\nAppelant : Bonjour, ' + res[m].toLowerCase() + '\nAssistant : Très bien, je note votre demande. Pouvez-vous me donner votre nom et votre adresse ?' : undefined }); }
+    for (var i = 0; i < 46; i++) { var m = mot[i % 10], q = new Date(now - (i * 15.5 + (i % 3) * 4) * H); appels.push({ id: i + 1, quand: q.toISOString(), appelant: '06 1' + (i % 10) + ' 4' + (i % 7) + ' 2' + (i % 5) + ' 8' + (i % 9), nom: noms[i % 10], motif: m, resume: res[m], rdv: m === 'rdv' ? ['Mardi 14 h', 'Jeudi matin', 'Lundi 17 h 30'][i % 3] : '', urgent: m === 'urgence', duree_s: 70 + (i * 37) % 240, statut: i < 3 ? 'a_rappeler' : (i < 6 ? 'nouveau' : 'traite'), audio: plan === 'premium' ? 'demo' : undefined, transcript: plan === 'premium' ? 'Assistant : Bonjour, Plomberie Dupont, je suis Léa, l’assistante virtuelle. Que puis-je faire pour vous ?\nAppelant : Bonjour, ' + res[m].toLowerCase() + '\nAssistant : Très bien, je note votre demande. Pouvez-vous me donner votre nom et votre adresse ?' : undefined }); }
     return { ok: true, plan: plan, client: { email: 'contact@exemple.fr', nom: 'Jean Dupont', entreprise: 'Plomberie Dupont', telephone: '06 12 34 56 78', assistant_branche: true, carte: true }, abonnement: { id: 'sub_demo', statut: 'active', statut_lib: 'Actif', formule: plan, prix_base: PRIX[plan], remise: 2000, remise_nom: 'Black Friday −20 €/mois à vie', prix_net: PRIX[plan] - 2000, fin_periode: Math.round(now / 1000) + 18 * 86400, annulation_prevue: false, debut: Math.round(now / 1000) - 60 * 86400 }, factures: [{ numero: 'A1B2C3-0002', date: Math.round(now / 1000) - 12 * 86400, montant: PRIX[plan] - 2000, statut: 'paid', pdf: '', lien: '', periode: { start: Math.round(now / 1000) - 12 * 86400, end: Math.round(now / 1000) + 18 * 86400 } }, { numero: 'A1B2C3-0001', date: Math.round(now / 1000) - 42 * 86400, montant: 0, statut: 'paid', pdf: '', lien: '', periode: null }], documents: [{ titre: 'Récapitulatif d’installation', type: 'Installation', url: '/cgv', date: new Date(now - 58 * 864e5).toISOString() }], appels: appels };
   }
 
