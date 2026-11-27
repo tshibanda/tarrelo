@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Espace client | Tarrelo</title>
-<meta name="description" content="Votre demande est bien reçue.">
+<meta name="description" content="Suivez vos appels, gérez votre abonnement et téléchargez vos factures.">
 <meta name="robots" content="noindex, nofollow">
 
 <meta name="theme-color" content="#14213D">
@@ -14,11 +14,12 @@
 <link rel="preload" href="/assets/fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/assets/site.css?v=20261126b">
+<link rel="stylesheet" href="/assets/espace-client.css?v=20261127">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="Tarrelo">
 <meta property="og:title" content="Espace client">
-<meta property="og:description" content="Votre demande est bien reçue.">
+<meta property="og:description" content="Suivez vos appels, gérez votre abonnement et téléchargez vos factures.">
 <meta property="og:url" content="https://tarrelo.com/espace-client">
 <meta property="og:image" content="https://tarrelo.com/assets/og-tarrelo.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -133,12 +134,11 @@ html{scroll-behavior:smooth}</style>
 </header>
 
 <main id="contenu">
-<main id="contenu">
 <section style="padding: 40px 0 80px"><div class="wrap"><div style="display: grid; gap: 32px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start">
 <div style="display: flex; flex-direction: column; gap: 16px">
 <p class="eyebrow">Espace client</p>
-<h1 class="h1x" style="font-size: 48px; line-height: 1.06; font-weight: 800; letter-spacing: -1.4px">Votre abonnement, en libre-service.</h1>
-<p class="lead">Consultez et téléchargez vos factures, mettez à jour vos coordonnées et votre moyen de paiement, changez de formule ou résiliez, sans frais.</p>
+<h1 class="h1x" style="font-size: 48px; line-height: 1.06; font-weight: 800; letter-spacing: -1.4px">Tous vos appels, sous contrôle.</h1>
+<p class="lead">Suivez chaque appel décroché par votre assistant, ses résumés et vos rappels à faire. Gérez votre formule, téléchargez vos factures et vos documents, en toute autonomie.</p>
 <p style="font-size: 15px; color: #4A5568">Connectez-vous avec l'e-mail utilisé lors de votre commande et le mot de passe choisi à l'activation. Pas encore activé ? Utilisez le lien reçu par e-mail, ou « Mot de passe oublié ».</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 16px">
@@ -181,14 +181,6 @@ html{scroll-behavior:smooth}</style>
 </div>
 <script src="/assets/site.js" defer></script>
 
-<script>
-(function(){var H='https://tarrelo.app.n8n.cloud/webhook/tarrelo/compte/';function post(u,d){var p=new URLSearchParams();for(var k in d)p.append(k,d[k]);return fetch(H+u,{method:'POST',body:p}).then(function(r){return r.json();});}
-var f=document.getElementById('ec-form'),st=document.getElementById('ec-status'),b=f.querySelector('button'),o=document.getElementById('ec-oubli'),os=document.getElementById('ec-oubli-status');
-var err='Service momentanément indisponible. Écrivez-nous à contact@tarrelo.com.';
-document.getElementById('ec-oubli-lien').addEventListener('click',function(e){e.preventDefault();o.hidden=false;o.email.value=f.email.value;o.email.focus();});
-f.addEventListener('submit',function(e){e.preventDefault();if(!f.reportValidity())return;b.disabled=true;b.textContent='Vérification…';st.hidden=true;
-post('connexion',{email:f.email.value.trim(),password:f.password.value}).then(function(j){if(j&&j.ok&&j.url){window.location.href=j.url;return;}st.hidden=false;st.textContent=(j&&j.error)||err;b.disabled=false;b.textContent='Accéder à mon espace';}).catch(function(){st.hidden=false;st.textContent=err;b.disabled=false;b.textContent='Accéder à mon espace';});});
-o.addEventListener('submit',function(e){e.preventDefault();if(!o.reportValidity())return;post('oubli',{email:o.email.value.trim()}).catch(function(){}).then(function(){os.hidden=false;os.textContent='Si un compte existe pour cette adresse, un lien vient de vous être envoyé (valable 2 heures).';});});})();
-</script>
+<script src="/assets/espace-client.js?v=20261127" defer></script>
 </body>
 </html>

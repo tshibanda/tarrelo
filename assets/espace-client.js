@@ -1,0 +1,343 @@
+/* Espace client Tarrelo : connexion + application de suivi des appels */
+(function () {
+  'use strict';
+  var API = 'https://tarrelo.app.n8n.cloud/webhook/tarrelo/';
+  var KEY = 'tarrelo_ec';
+  var D = null, T = null, DEMO = false;
+  var PRIX = { standard: 6900, premium: 8900 };
+  var PREM = ['Écoute des enregistrements et transcriptions', 'Récaps par e-mail', 'Dossiers clients et commandes', 'Synchronisation avec votre agenda', 'Voix personnalisée (timbre, ton, débit)', 'Appels sortants', 'Statistiques détaillées', 'Support sous 24 h ouvrées'];
+
+  // ---------- Utilitaires ----------
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function store(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function post(path, data) {
+    var p = new URLSearchParams(); Object.keys(data).forEach(function (k) { p.append(k, data[k]); });
+    return fetch(API + path, { method: 'POST', body: p }).then(function (r) { return r.json().catch(function () { return { ok: false }; }); });
+  }
+  function d(v) { if (!v) return null; var x = typeof v === 'number' ? new Date(v * 1000) : new Date(v); return isNaN(x) ? null : x; }
+  function fdate(v, opt) { var x = d(v); return x ? x.toLocaleDateString('fr-FR', opt || { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }) : '—'; }
+  function fdt(v) { var x = d(v); return x ? x.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Europe/Paris' }) + ' · ' + x.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }) : '—'; }
+  function euro(c) { return (Number(c || 0) / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: (c % 100 ? 2 : 0) }); }
+  function dur(s) { s = Number(s || 0); if (!s) return '—'; var m = Math.floor(s / 60), r = s % 60; return m ? m + ' min ' + (r < 10 ? '0' : '') + r : r + ' s'; }
+  function nb(n) { return Number(n || 0).toLocaleString('fr-FR'); }
+  function tel(t) { return t ? '<a href="tel:' + esc(String(t).replace(/\s/g, '')) + '">' + esc(t) + '</a>' : '<span class="m">Numéro masqué</span>'; }
+  function since(v, days) { var x = d(v); return x && x > new Date(Date.now() - days * 864e5); }
+  function between(v, a, b) { var x = d(v); return x && x <= new Date(Date.now() - a * 864e5) && x > new Date(Date.now() - b * 864e5); }
+  function parisParts(v) { var x = d(v); if (!x) return null; var f = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: 'numeric', hourCycle: 'h23', weekday: 'short' }).formatToParts(x); var h = 0, w = ''; f.forEach(function (p) { if (p.type === 'hour') h = Number(p.value); if (p.type === 'weekday') w = p.value; }); return { h: h, w: w.replace('.', '') }; }
+  var MOTIFS = { rdv: ['Rendez-vous', 'ok'], devis: ['Devis', 'wait'], urgence: ['Urgence', 'ko'], commande: ['Commande', 'pr'], information: ['Information', ''], rappel: ['À rappeler', 'wait'], autre: ['Autre', ''] };
+  function motif(m) { var x = MOTIFS[m] || MOTIFS.autre; return '<span class="bd ' + x[1] + '">' + x[0] + '</span>'; }
+  var STATUTS = { nouveau: 'Nouveau', a_rappeler: 'À rappeler', traite: 'Traité' };
+  var ICO = {
+    tdb: '<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',
+    appels: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
+    rdv: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    dossiers: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+    commandes: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/>',
+    stats: '<path d="M18 20V10M12 20V4M6 20v-6"/>',
+    abonnement: '<rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/>',
+    factures: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>',
+    compte: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'
+  };
+  function ico(k, w) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (w ? ' width="' + w + '" height="' + w + '"' : '') + '>' + ICO[k] + '</svg>'; }
+
+  var NAV = [
+    ['tdb', 'Tableau de bord', false], ['appels', 'Appels', false], ['rdv', 'Rendez-vous', false],
+    ['dossiers', 'Dossiers clients', true], ['commandes', 'Commandes', true], ['stats', 'Statistiques', true],
+    ['sep'], ['abonnement', 'Abonnement', false], ['factures', 'Factures et documents', false], ['compte', 'Mon compte', false]
+  ];
+  function premium() { return D && D.plan === 'premium'; }
+
+  // ---------- Connexion ----------
+  function initLogin() {
+    var f = document.getElementById('ec-form'), st = document.getElementById('ec-status'), o = document.getElementById('ec-oubli'), os = document.getElementById('ec-oubli-status');
+    if (!f) return;
+    var b = f.querySelector('button'), err = 'Service momentanément indisponible. Écrivez-nous à contact@tarrelo.com.';
+    var lien = document.getElementById('ec-oubli-lien');
+    if (lien) lien.addEventListener('click', function (e) { e.preventDefault(); o.hidden = false; o.email.value = f.email.value; o.email.focus(); });
+    f.addEventListener('submit', function (e) {
+      e.preventDefault(); if (!f.reportValidity()) return;
+      b.disabled = true; b.textContent = 'Connexion…'; st.hidden = true;
+      post('compte/connexion', { email: f.email.value.trim(), password: f.password.value }).then(function (j) {
+        if (j && j.ok && j.token) { store(KEY, j.token); T = j.token; f.password.value = ''; start(); return; }
+        st.hidden = false; st.textContent = (j && j.error) || err;
+      }).catch(function () { st.hidden = false; st.textContent = err; }).then(function () { b.disabled = false; b.textContent = 'Accéder à mon espace'; });
+    });
+    o.addEventListener('submit', function (e) {
+      e.preventDefault(); if (!o.reportValidity()) return;
+      post('compte/oubli', { email: o.email.value.trim() }).catch(function () {}).then(function () { os.hidden = false; os.textContent = 'Si un compte existe pour cette adresse, un lien vient de vous être envoyé (valable 2 heures).'; });
+    });
+  }
+  function logout() { store(KEY, null); T = null; D = null; document.body.classList.remove('ec-on'); var a = document.getElementById('ec-app'); if (a) a.innerHTML = ''; window.scrollTo(0, 0); }
+
+  // ---------- Chargement ----------
+  function start() {
+    var app = document.getElementById('ec-app');
+    document.body.classList.add('ec-on');
+    app.innerHTML = '<div class="app"><aside></aside><div class="main"><div class="skel" style="width:40%;height:28px"></div><div class="skel"></div><div class="skel" style="width:70%"></div><div class="skel" style="width:85%"></div></div></div>';
+    if (DEMO) { D = demoData(DEMO); render(); return; }
+    post('ec/donnees', { t: T }).then(function (j) {
+      if (j && j.ok) { D = j; render(); return; }
+      logout(); var st = document.getElementById('ec-status'); if (st) { st.hidden = false; st.textContent = (j && j.error) || 'Votre session a expiré, reconnectez-vous.'; }
+    }).catch(function () { logout(); var st = document.getElementById('ec-status'); if (st) { st.hidden = false; st.textContent = 'Connexion impossible pour le moment. Réessayez dans un instant.'; } });
+  }
+  function refresh(msg) { if (DEMO) { toast(msg || 'Fait (aperçu).'); return; } post('ec/donnees', { t: T }).then(function (j) { if (j && j.ok) { D = j; render(); } if (msg) toast(msg); }); }
+
+  // ---------- Rendu ----------
+  function render() {
+    var a = D.abonnement || {}, c = D.client || {}, ap = D.appels || [];
+    var aRappeler = ap.filter(function (x) { return x.statut === 'a_rappeler'; }).length;
+    var nav = NAV.map(function (n) {
+      if (n[0] === 'sep') return '<div class="sep"></div>';
+      var lock = n[2] && !premium() ? '<span class="lk">PREMIUM</span>' : '';
+      var em = n[0] === 'appels' && aRappeler ? '<em>' + aRappeler + '</em>' : '';
+      return '<a href="#' + n[0] + '" class="nav" data-p="' + n[0] + '">' + ico(n[0]) + '<span>' + n[1] + '</span>' + (lock || em) + '</a>';
+    }).join('');
+    var planLib = D.plan === 'premium' ? 'Premium' : (D.plan === 'standard' ? 'Standard' : 'Sans abonnement actif');
+    var html = '<div class="app"><aside><a class="logo" href="/" aria-label="Tarrelo, accueil"><img src="/assets/tarrelo-logo-blanc.png" alt="Tarrelo"></a>'
+      + '<div class="who"><strong>' + esc(c.entreprise || c.nom || c.email) + '</strong>Formule ' + planLib + '</div>' + nav
+      + '<div class="foot">Besoin d’aide ?<br><a href="tel:+33978466369">09 78 46 63 69</a><br><a href="mailto:contact@tarrelo.com">contact@tarrelo.com</a><br><br><a href="#" data-act="logout">Se déconnecter</a></div></aside>'
+      + '<div><div class="mtop"><img src="/assets/tarrelo-logo.png" alt="Tarrelo"><button class="b ghost sm" data-act="logout">Déconnexion</button></div><div class="main">'
+      + (DEMO ? '<div class="demo">Aperçu avec des données fictives (formule ' + (DEMO === 'premium' ? 'Premium' : 'Standard') + '). <a href="/espace-client">Se connecter à mon espace</a></div>' : '')
+      + paneTdb() + paneAppels() + paneRdv() + paneDossiers() + paneCommandes() + paneStats() + paneAbonnement() + paneFactures() + paneCompte()
+      + '</div></div></div>';
+    document.getElementById('ec-app').innerHTML = html;
+    document.querySelectorAll('#ec-app .tw table').forEach(function (t) { var h = Array.prototype.map.call(t.querySelectorAll('thead th'), function (x) { return x.textContent; }); t.querySelectorAll('tbody tr').forEach(function (r) { Array.prototype.forEach.call(r.children, function (c, i) { if (h[i] && c.colSpan === 1) c.setAttribute('data-l', h[i]); }); }); });
+    bind();
+    go(location.hash.slice(1));
+  }
+  function head(t, s, acts) { return '<div class="top"><div><h1>' + t + '</h1>' + (s ? '<p>' + s + '</p>' : '') + '</div>' + (acts ? '<div class="acts">' + acts + '</div>' : '') + '</div>'; }
+  function kpi(v, l, s, hi) { return '<div class="k' + (hi ? ' hi' : '') + '"><div class="kl">' + l + '</div><div class="kv">' + v + '</div>' + (s ? '<div class="ks">' + s + '</div>' : '') + '</div>'; }
+  function trend(a, b) { if (!b) return a ? '<span class="up">nouveau</span>' : ''; var p = Math.round((a - b) * 100 / b); return '<span class="' + (p >= 0 ? 'up' : 'down') + '">' + (p >= 0 ? '+' : '') + p + ' %</span> vs 30 j précédents'; }
+  function vide(t, s) { return '<div class="vide"><strong>' + t + '</strong>' + (s || '') + '</div>'; }
+  function noCalls() { return D.client.assistant_branche ? vide('Aucun appel pour le moment', 'Dès que votre assistant décrochera, chaque appel apparaîtra ici avec son résumé.') : vide('Votre assistant est en cours d’installation', 'Vos appels apparaîtront ici dès sa mise en service. Une question ? Appelez le 09 78 46 63 69.'); }
+  function upsellBanner() { return premium() || D.plan === 'aucun' ? '' : '<div class="banner"><p>Passez en <strong>Premium</strong> : réécoutez chaque appel, lisez les transcriptions, suivez vos dossiers clients et recevez les récaps par e-mail.</p><button class="b" data-act="upgrade">Découvrir Premium</button></div>'; }
+
+  function paneTdb() {
+    var ap = D.appels || [];
+    var a30 = ap.filter(function (x) { return since(x.quand, 30); }), p30 = ap.filter(function (x) { return between(x.quand, 30, 60); });
+    var rap = ap.filter(function (x) { return x.statut === 'a_rappeler'; });
+    var urg = a30.filter(function (x) { return x.urgent; }).length, rdv = a30.filter(function (x) { return x.motif === 'rdv' || x.rdv; }).length;
+    var moy = a30.length ? Math.round(a30.reduce(function (t, x) { return t + x.duree_s; }, 0) / a30.length) : 0;
+    var hors = a30.filter(function (x) { var p = parisParts(x.quand); return p && (p.h < 8 || p.h >= 19 || p.w === 'sam' || p.w === 'dim'); }).length;
+    var todo = ap.filter(function (x) { return x.statut === 'a_rappeler' || (x.urgent && x.statut !== 'traite') || x.statut === 'nouveau'; }).slice(0, 6);
+    var ab = D.abonnement;
+    var st = '<div class="card"><h2>Votre assistant</h2><div class="status"><span class="pulse' + (D.client.assistant_branche ? '' : ' off') + '"></span><div><strong>' + (D.client.assistant_branche ? 'En service : il décroche quand vous ne pouvez pas répondre' : 'Installation en cours') + '</strong><div class="m">' + (D.client.assistant_branche ? 'Renvoi d’appel actif sur votre numéro. SMS récap envoyé après chaque appel' + (premium() ? ', récap par e-mail inclus.' : '.') : 'Nous finalisons sa configuration avec vos informations (sous 2 jours ouvrés).') + '</div></div></div>'
+      + (ab ? '<p class="m" style="margin-top:14px">Formule <strong>' + (ab.formule === 'premium' ? 'Premium' : 'Standard') + '</strong> · ' + esc(ab.statut_lib) + (ab.fin_periode ? ' · prochaine échéance le ' + fdate(ab.fin_periode) : '') + '</p>' : '') + '</div>';
+    var list = todo.length ? '<ul class="todo">' + todo.map(function (x) { return '<li><span class="dot' + (x.urgent ? ' u' : '') + '"></span><div class="tx"><strong>' + esc(x.nom || 'Appelant') + ' · ' + tel(x.appelant) + '</strong><span class="m">' + fdt(x.quand) + '</span><div>' + esc(x.resume) + '</div></div>' + motif(x.motif) + '</li>'; }).join('') + '</ul>' : (ap.length ? vide('Tout est à jour', 'Aucun appel en attente de traitement.') : noCalls());
+    return '<section class="pane" id="p-tdb">' + head('Bonjour' + (D.client.nom ? ' ' + esc(String(D.client.nom).split(' ')[0]) : '') + ' 👋', 'Voici comment se passent vos appels.', '<a class="b ghost" href="#appels" data-go="appels">Voir tous les appels</a>')
+      + upsellBanner()
+      + '<div class="grid">' + kpi(nb(a30.length), 'Appels décrochés', '30 derniers jours · ' + trend(a30.length, p30.length), true) + kpi(nb(rap.length), 'À rappeler', rap.length ? 'Clients qui attendent un retour' : 'Rien en attente') + kpi(nb(rdv), 'Demandes de RDV', '30 derniers jours') + kpi(nb(urg), 'Urgences', '30 derniers jours') + kpi(nb(hors), 'Hors heures ouvrées', 'Soir, nuit et week-end') + kpi(dur(moy), 'Durée moyenne', 'par appel') + '</div>'
+      + '<div class="two"><div class="card"><h2>Appels par jour <span class="m">30 derniers jours</span></h2>' + chart(ap) + '</div>' + st + '</div>'
+      + '<div class="card"><h2>À traiter <a href="#appels" data-go="appels">Tout voir →</a></h2>' + list + '</div></section>';
+  }
+  function chart(ap) {
+    var days = []; for (var i = 29; i >= 0; i--) { var x = new Date(Date.now() - i * 864e5); days.push({ k: x.toLocaleDateString('fr-CA', { timeZone: 'Europe/Paris' }), l: x, n: 0, u: 0 }); }
+    var idx = {}; days.forEach(function (dd, i) { idx[dd.k] = i; });
+    ap.forEach(function (a) { var x = d(a.quand); if (!x) return; var k = x.toLocaleDateString('fr-CA', { timeZone: 'Europe/Paris' }); if (idx[k] != null) { days[idx[k]].n++; if (a.urgent) days[idx[k]].u++; } });
+    var max = Math.max(1, Math.max.apply(null, days.map(function (x) { return x.n; }))), w = 100 / days.length;
+    if (!ap.length) return '<p class="m" style="padding:30px 0;text-align:center">Le graphique se remplira avec vos premiers appels.</p>';
+    return '<svg class="chart" viewBox="0 0 100 40" preserveAspectRatio="none" role="img" aria-label="Appels par jour">' + days.map(function (x, i) { var h = x.n / max * 36; return '<g><title>' + x.l.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) + ' : ' + x.n + ' appel(s)</title><rect x="' + (i * w + w * .15) + '" y="' + (40 - h) + '" width="' + (w * .7) + '" height="' + h + '" rx=".6" class="bu"/></g>'; }).join('') + '</svg><div class="axe"><span>il y a 30 jours</span><span>aujourd’hui</span></div>';
+  }
+  function rowAppel(x) {
+    var ecoute = premium() ? (x.audio ? '<button class="b ghost sm" data-audio="' + esc(x.audio) + '">▶ Écouter</button>' : '<span class="m">—</span>') + (x.transcript ? '<details><summary>Transcription</summary><div class="det">' + esc(x.transcript) + '</div></details>' : '') : '<button class="lock" data-act="upgrade" title="Réservé à la formule Premium">' + ico('lock', 13) + ' Écoute et transcription</button>';
+    var sel = '<select data-statut="' + x.id + '" aria-label="Statut">' + Object.keys(STATUTS).map(function (k) { return '<option value="' + k + '"' + (x.statut === k ? ' selected' : '') + '>' + STATUTS[k] + '</option>'; }).join('') + '</select>';
+    return '<tr data-m="' + esc(x.motif) + '" data-s="' + esc(x.statut) + '" data-q="' + esc(x.quand) + '"><td><strong>' + fdt(x.quand) + '</strong><br><span class="m">' + dur(x.duree_s) + '</span></td><td><strong>' + esc(x.nom || 'Appelant') + '</strong><br>' + tel(x.appelant) + '</td><td>' + motif(x.motif) + (x.urgent ? ' <span class="bd ko">Urgent</span>' : '') + '</td><td class="res">' + esc(x.resume) + (x.rdv ? '<div class="m" style="margin-top:4px"><strong>RDV :</strong> ' + esc(x.rdv) + '</div>' : '') + '</td><td>' + ecoute + '</td><td>' + sel + '</td></tr>';
+  }
+  function paneAppels() {
+    var ap = D.appels || [];
+    var tools = '<div class="tools"><input type="search" placeholder="Rechercher un nom, un numéro, un mot…" data-filter="t-appels" aria-label="Rechercher"><select data-fm="t-appels" aria-label="Motif"><option value="">Tous les motifs</option>' + Object.keys(MOTIFS).map(function (k) { return '<option value="' + k + '">' + MOTIFS[k][0] + '</option>'; }).join('') + '</select><select data-fs="t-appels" aria-label="Statut"><option value="">Tous les statuts</option>' + Object.keys(STATUTS).map(function (k) { return '<option value="' + k + '">' + STATUTS[k] + '</option>'; }).join('') + '</select><select data-fp="t-appels" aria-label="Période"><option value="">Toute la période</option><option value="7">7 derniers jours</option><option value="30">30 derniers jours</option><option value="90">90 derniers jours</option></select><span class="cnt" data-count="t-appels">' + ap.length + ' appel' + (ap.length > 1 ? 's' : '') + '</span></div>';
+    return '<section class="pane" id="p-appels">' + head('Appels', 'Chaque appel décroché par votre assistant, avec son résumé. Classez-les au fil de vos rappels.', ap.length ? '<button class="b ghost" data-act="csv">Exporter (CSV)</button>' : '')
+      + (premium() ? '' : '<div class="info">' + ico('lock', 14) + ' L’écoute des enregistrements et les transcriptions complètes sont incluses dans la formule <a href="#" data-act="upgrade">Premium</a>.</div>')
+      + (ap.length ? tools + '<div class="tw"><table id="t-appels"><thead><tr><th>Quand</th><th>Appelant</th><th>Motif</th><th>Résumé</th><th>Enregistrement</th><th>Statut</th></tr></thead><tbody>' + ap.map(rowAppel).join('') + '</tbody></table></div>' : '<div class="card">' + noCalls() + '</div>') + '</section>';
+  }
+  function paneRdv() {
+    var r = (D.appels || []).filter(function (x) { return x.motif === 'rdv' || x.rdv; });
+    return '<section class="pane" id="p-rdv">' + head('Rendez-vous', 'Les demandes de rendez-vous prises par votre assistant.' + (premium() ? '' : ' En Premium, ils sont synchronisés avec votre agenda professionnel.'))
+      + (r.length ? '<div class="tw"><table><thead><tr><th>Demandé le</th><th>Client</th><th>Créneau</th><th>Détail</th><th>Statut</th></tr></thead><tbody>' + r.map(function (x) { return '<tr><td>' + fdt(x.quand) + '</td><td><strong>' + esc(x.nom || 'Client') + '</strong><br>' + tel(x.appelant) + '</td><td><strong>' + esc(x.rdv || 'À convenir') + '</strong></td><td class="res">' + esc(x.resume) + '</td><td><span class="bd ' + (x.statut === 'traite' ? 'ok' : 'wait') + '">' + (x.statut === 'traite' ? 'Confirmé / traité' : 'À confirmer') + '</span></td></tr>'; }).join('') + '</tbody></table></div>' : '<div class="card">' + vide('Aucune demande de rendez-vous pour le moment', 'Elles apparaîtront ici dès qu’un client en demandera un.') + '</div>') + '</section>';
+  }
+  function gate(id, titre, intro, points, preview) {
+    return '<section class="pane" id="p-' + id + '">' + head(titre, intro) + '<div class="gate"><div class="blur" aria-hidden="true">' + preview + '</div><div class="ov"><div class="box"><div class="ic">' + '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#14213D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' + ICO.lock + '</svg></div><h3>' + titre + ' : inclus dans Premium</h3><p>' + intro + '</p><ul>' + points.map(function (p) { return '<li>' + p + '</li>'; }).join('') + '</ul><div><button class="b" data-act="upgrade">Passer en Premium</button></div><p class="m" style="margin:10px 0 0">Sans engagement · vous pouvez revenir en Standard à tout moment</p></div></div></div></section>';
+  }
+  function fakeTable(rows) { return '<table><thead><tr><th>Client</th><th>Appels</th><th>Dernier contact</th><th>Motifs</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><td><strong>' + r[0] + '</strong><br><span class="m">06 •• •• •• ••</span></td><td>' + r[1] + '</td><td>' + r[2] + '</td><td><span class="bd ok">Rendez-vous</span> <span class="bd wait">Devis</span></td></tr>'; }).join('') + '</tbody></table>'; }
+  function paneDossiers() {
+    if (!premium()) return gate('dossiers', 'Dossiers clients', 'Retrouvez l’historique complet de chaque client : tous ses appels, ses demandes et ses rendez-vous, au même endroit.', ['Historique de chaque appelant', 'Résumés et enregistrements regroupés', 'Clients fidèles repérés en un coup d’œil'], fakeTable([['M. Martin', 4, 'hier'], ['Mme Bernard', 2, 'lundi'], ['SCI Les Tilleuls', 3, '12 nov.'], ['M. Petit', 1, '9 nov.']]));
+    var g = {}; (D.appels || []).forEach(function (x) { var k = x.appelant || ('inconnu-' + x.id); if (!g[k]) g[k] = { tel: x.appelant, nom: '', items: [] }; g[k].items.push(x); if (!g[k].nom && x.nom) g[k].nom = x.nom; });
+    var L = Object.keys(g).map(function (k) { return g[k]; }).sort(function (a, b) { return String(b.items[0].quand).localeCompare(String(a.items[0].quand)); });
+    return '<section class="pane" id="p-dossiers">' + head('Dossiers clients', 'Tous les appels regroupés par client.')
+      + (L.length ? '<div class="tools"><input type="search" placeholder="Rechercher un client…" data-filter="t-dos" aria-label="Rechercher"><span class="cnt" data-count="t-dos">' + L.length + ' client' + (L.length > 1 ? 's' : '') + '</span></div><div class="tw"><table id="t-dos"><thead><tr><th>Client</th><th>Appels</th><th>Dernier contact</th><th>Historique</th></tr></thead><tbody>' + L.map(function (c) { var mot = {}; c.items.forEach(function (x) { mot[x.motif] = 1; }); return '<tr><td><strong>' + esc(c.nom || 'Client sans nom') + '</strong><br>' + tel(c.tel) + '</td><td><strong>' + c.items.length + '</strong></td><td>' + fdt(c.items[0].quand) + '<br>' + Object.keys(mot).map(motif).join(' ') + '</td><td><details><summary>Voir les ' + c.items.length + ' appel' + (c.items.length > 1 ? 's' : '') + '</summary><div class="det">' + c.items.map(function (x) { return fdt(x.quand) + ' – ' + (MOTIFS[x.motif] || MOTIFS.autre)[0] + '\n' + x.resume; }).map(esc).join('\n\n') + '</div></details></td></tr>'; }).join('') + '</tbody></table></div>' : '<div class="card">' + noCalls() + '</div>') + '</section>';
+  }
+  function paneCommandes() {
+    if (!premium()) return gate('commandes', 'Commandes', 'Votre assistant prend les commandes au téléphone (produits, quantités, retrait ou livraison) et vous les retrouvez ici, prêtes à préparer.', ['Commandes détaillées et horodatées', 'Coordonnées du client jointes', 'Suivi « à préparer » / « traitée »'], fakeTable([['Boulangerie Durand', 1, 'aujourd’hui'], ['M. Leroy', 2, 'hier'], ['Mme Moreau', 1, 'mardi']]));
+    var c = (D.appels || []).filter(function (x) { return x.motif === 'commande'; });
+    return '<section class="pane" id="p-commandes">' + head('Commandes', 'Les commandes prises par téléphone par votre assistant.')
+      + (c.length ? '<div class="tw"><table><thead><tr><th>Quand</th><th>Client</th><th>Commande</th><th>Statut</th></tr></thead><tbody>' + c.map(function (x) { return '<tr><td>' + fdt(x.quand) + '</td><td><strong>' + esc(x.nom || 'Client') + '</strong><br>' + tel(x.appelant) + '</td><td class="res">' + esc(x.resume) + '</td><td><span class="bd ' + (x.statut === 'traite' ? 'ok' : 'wait') + '">' + (x.statut === 'traite' ? 'Traitée' : 'À préparer') + '</span></td></tr>'; }).join('') + '</tbody></table></div>' : '<div class="card">' + vide('Aucune commande pour le moment', 'Les commandes passées par téléphone s’afficheront ici.') + '</div>') + '</section>';
+  }
+  function paneStats() {
+    if (!premium()) return gate('stats', 'Statistiques', 'Comprenez quand et pourquoi vos clients appellent pour vous organiser au mieux.', ['Motifs d’appel en détail', 'Heures et jours les plus chargés', 'Part des appels hors heures ouvrées'], '<div class="grid">' + kpi('128', 'Appels', '90 jours') + kpi('34 %', 'Hors heures', 'soir et week-end') + kpi('41', 'Rendez-vous', '') + '</div><div class="skel" style="height:120px"></div>');
+    var ap = (D.appels || []).filter(function (x) { return since(x.quand, 90); });
+    var mot = {}; ap.forEach(function (x) { mot[x.motif] = (mot[x.motif] || 0) + 1; });
+    var mo = Object.keys(mot).sort(function (a, b) { return mot[b] - mot[a]; });
+    var J = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim'], H = {}, max = 1;
+    ap.forEach(function (x) { var p = parisParts(x.quand); if (!p) return; var k = p.w + p.h; H[k] = (H[k] || 0) + 1; if (H[k] > max) max = H[k]; });
+    var heat = '<div class="heat"><span></span>' + Array.from({ length: 24 }, function (_, h) { return '<span style="text-align:center">' + (h % 3 ? '' : h) + '</span>'; }).join('') + J.map(function (j) { return '<span>' + j + '</span>' + Array.from({ length: 24 }, function (_, h) { var n = H[j + h] || 0; return '<span class="c" title="' + j + ' ' + h + ' h : ' + n + ' appel(s)" style="opacity:' + (n ? (0.18 + 0.82 * n / max).toFixed(2) : 0.06) + '"></span>'; }).join(''); }).join('') + '</div>';
+    var hors = ap.filter(function (x) { var p = parisParts(x.quand); return p && (p.h < 8 || p.h >= 19 || p.w === 'sam' || p.w === 'dim'); }).length;
+    var tot = ap.reduce(function (t, x) { return t + x.duree_s; }, 0);
+    return '<section class="pane" id="p-stats">' + head('Statistiques', '90 derniers jours.')
+      + (ap.length ? '<div class="grid">' + kpi(nb(ap.length), 'Appels décrochés', '90 jours', true) + kpi(Math.round(hors * 100 / ap.length) + ' %', 'Hors heures ouvrées', nb(hors) + ' appels') + kpi(Math.round(tot / 60) + ' min', 'Temps de conversation', 'gérés à votre place') + kpi(nb(ap.filter(function (x) { return x.urgent; }).length), 'Urgences', 'signalées') + '</div>'
+      + '<div class="two"><div class="card"><h2>Motifs d’appel</h2><ul class="rank">' + mo.map(function (k) { return '<li><span class="rk">' + (MOTIFS[k] || MOTIFS.autre)[0] + '</span><span class="rn">' + mot[k] + '</span><span class="rb" style="width:' + Math.round(mot[k] * 100 / ap.length) + '%"></span></li>'; }).join('') + '</ul></div><div class="card"><h2>Quand vos clients appellent</h2>' + heat + '</div></div>' : '<div class="card">' + noCalls() + '</div>') + '</section>';
+  }
+  function feats(p) {
+    var S = ['Assistant IA 24h/24 sur votre numéro', 'Réponses aux questions fréquentes', 'Prise de rendez-vous', 'Transfert des urgences', 'SMS récap de chaque appel', 'Suivi des appels dans l’espace client'];
+    var P = PREM;
+    return '<ul class="feat">' + S.map(function (x) { return '<li>' + x + '</li>'; }).join('') + P.map(function (x) { return '<li' + (p === 'premium' ? '' : ' class="no"') + '>' + x + '</li>'; }).join('') + '</ul>';
+  }
+  function prixNet(f) { var ab = D.abonnement || {}; return Math.max(0, PRIX[f] - (ab.remise || 0)); }
+  function paneAbonnement() {
+    var ab = D.abonnement;
+    if (!ab) return '<section class="pane" id="p-abonnement">' + head('Abonnement') + '<div class="card">' + vide('Aucun abonnement actif', 'Choisissez une formule sur <a href="/tarifs">la page Tarifs</a>, ou appelez-nous au 09 78 46 63 69.') + '</div></section>';
+    var cur = ab.formule === 'premium' ? 'premium' : 'standard';
+    var alerte = '';
+    if (ab.annulation_prevue) alerte = '<div class="warn">Votre abonnement prendra fin le <strong>' + fdate(ab.annule_le || ab.fin_periode) + '</strong>. Votre assistant décroche jusqu’à cette date. <button class="b sm" data-act="reprendre" style="margin-left:8px">Annuler la résiliation</button></div>';
+    else if (ab.statut === 'past_due' || ab.statut === 'unpaid') alerte = '<div class="warn">Le dernier paiement n’a pas abouti. Mettez à jour votre moyen de paiement pour que votre assistant reste actif. <button class="b sm" data-act="portail" style="margin-left:8px">Mettre à jour ma carte</button></div>';
+    var card = function (f) {
+      var isCur = f === cur, nom = f === 'premium' ? 'Premium' : 'Standard';
+      var btn = isCur ? '<span class="bd ok">Votre formule actuelle</span>' : (f === 'premium' ? '<button class="b" data-act="upgrade">Passer en Premium</button>' : '<button class="b ghost" data-act="downgrade">Passer en Standard</button>');
+      return '<div class="pc2' + (isCur ? ' cur' : '') + '">' + (f === 'premium' ? '<span class="bd pr">Le plus complet</span>' : '<span class="bd">L’essentiel</span>') + '<div style="font-weight:800;font-size:18px;margin-top:6px">' + nom + '</div><div class="px">' + euro(prixNet(f)) + ' <small>/mois</small></div>' + (ab.remise ? '<div class="m">au lieu de ' + euro(PRIX[f]) + ' · ' + esc(ab.remise_nom || 'remise') + '</div>' : '<div class="m">sans engagement</div>') + feats(f) + '<div class="go">' + btn + '</div></div>';
+    };
+    return '<section class="pane" id="p-abonnement">' + head('Abonnement', 'Gérez votre formule en toute autonomie : changement immédiat, sans engagement.', '<button class="b ghost" data-act="portail">Moyen de paiement</button>')
+      + alerte
+      + '<div class="grid">' + kpi(cur === 'premium' ? 'Premium' : 'Standard', 'Formule', esc(ab.statut_lib), true) + kpi(euro(ab.prix_net), 'Montant mensuel', ab.remise ? 'remise de ' + euro(ab.remise) + ' incluse' : 'TVA non applicable') + kpi(fdate(ab.fin_periode, { day: 'numeric', month: 'short' }), ab.statut === 'trialing' ? 'Fin de la période offerte' : 'Prochaine échéance', ab.annulation_prevue ? 'fin de l’abonnement' : 'renouvellement automatique') + kpi(fdate(ab.debut, { month: 'short', year: 'numeric' }), 'Client depuis', '') + '</div>'
+      + '<div class="plans">' + card('standard') + card('premium') + '</div>'
+      + '<div class="card" style="margin-top:18px"><h2>Résilier</h2><p class="m" style="font-size:14px">L’abonnement est sans engagement. En cas de résiliation, votre assistant continue de décrocher jusqu’à la fin de la période déjà payée, puis s’arrête. Vous pouvez annuler la résiliation tant qu’elle n’a pas pris effet.</p>' + (ab.annulation_prevue ? '<button class="b sm" data-act="reprendre" style="margin-top:12px">Annuler la résiliation</button>' : '<button class="b danger sm" data-act="resilier" style="margin-top:12px">Résilier mon abonnement</button>') + '</div></section>';
+  }
+  function paneFactures() {
+    var f = D.factures || [], docs = D.documents || [];
+    var lib = { paid: ['Payée', 'ok'], open: ['À payer', 'wait'], void: ['Annulée', ''], uncollectible: ['Impayée', 'ko'] };
+    var base = [{ titre: 'Conditions générales de vente', type: 'Contrat', url: '/cgv' }, { titre: 'Politique de confidentialité et traitement des appels', type: 'RGPD', url: '/confidentialite' }, { titre: 'Mentions légales', type: 'Légal', url: '/mentions-legales' }];
+    var all = docs.concat(base);
+    return '<section class="pane" id="p-factures">' + head('Factures et documents', 'Téléchargez vos factures et retrouvez toutes vos pièces.')
+      + '<div class="card"><h2>Factures</h2>' + (f.length ? '<div class="tw"><table><thead><tr><th>Numéro</th><th>Date</th><th>Période</th><th>Montant</th><th>Statut</th><th></th></tr></thead><tbody>' + f.map(function (x) { var l = lib[x.statut] || [x.statut, '']; return '<tr><td><strong>' + esc(x.numero) + '</strong></td><td>' + fdate(x.date) + '</td><td class="m">' + (x.periode ? fdate(x.periode.start, { day: 'numeric', month: 'short' }) + ' → ' + fdate(x.periode.end, { day: 'numeric', month: 'short', year: 'numeric' }) : '—') + '</td><td><strong>' + euro(x.montant) + '</strong></td><td><span class="bd ' + l[1] + '">' + l[0] + '</span></td><td style="white-space:nowrap">' + (x.pdf ? '<a class="b ghost sm" href="' + esc(x.pdf) + '" target="_blank" rel="noopener">Télécharger (PDF)</a> ' : '') + (x.lien ? '<a class="b ghost sm" href="' + esc(x.lien) + '" target="_blank" rel="noopener">' + (x.statut === 'open' ? 'Payer' : 'Voir') + '</a>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>' : vide('Aucune facture pour le moment', 'Vos factures apparaîtront ici à chaque échéance.')) + '</div>'
+      + '<div class="card"><h2>Mes documents</h2><div class="tw"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th></th></tr></thead><tbody>' + all.map(function (x) { return '<tr><td><strong>' + esc(x.titre) + '</strong></td><td><span class="bd">' + esc(x.type) + '</span></td><td>' + (x.date ? fdate(x.date) : '<span class="m">en vigueur</span>') + '</td><td><a class="b ghost sm" href="' + esc(x.url) + '" target="_blank" rel="noopener">Ouvrir</a></td></tr>'; }).join('') + '</tbody></table></div><p class="m" style="margin-top:10px">Besoin d’un autre document (attestation, devis, bon d’installation) ? Écrivez à <a href="mailto:contact@tarrelo.com">contact@tarrelo.com</a>, il sera ajouté ici.</p></div></section>';
+  }
+  function paneCompte() {
+    var c = D.client;
+    return '<section class="pane" id="p-compte">' + head('Mon compte')
+      + '<div class="two"><div class="card"><h2>Mes informations</h2><dl class="kv2"><dt>Nom</dt><dd>' + esc(c.nom || '—') + '</dd><dt>Entreprise</dt><dd>' + esc(c.entreprise || '—') + '</dd><dt>E-mail de connexion</dt><dd>' + esc(c.email) + '</dd><dt>Mobile pour les SMS</dt><dd>' + esc(c.telephone || '—') + '</dd><dt>Formule</dt><dd>' + (D.plan === 'premium' ? 'Premium' : D.plan === 'standard' ? 'Standard' : '—') + '</dd></dl><p class="m" style="margin-top:14px">Pour modifier ces informations ou les réglages de votre assistant (horaires, prestations, message d’accueil), répondez à n’importe quel e-mail Tarrelo ou appelez le 09 78 46 63 69.</p></div>'
+      + '<div class="card"><h2>Sécurité</h2><p class="m" style="font-size:14px;margin-bottom:12px">Pour changer de mot de passe, recevez un lien sécurisé sur votre e-mail de connexion.</p><button class="b ghost" data-act="mdp">Changer mon mot de passe</button><div class="sep" style="height:1px;background:#F0E8DD;margin:18px 0"></div><button class="b danger" data-act="logout">Se déconnecter</button></div></div>'
+      + '<div class="card"><h2>Support</h2><p style="font-size:14px">' + (premium() ? 'Formule Premium : <strong>réponse sous 24 h ouvrées</strong> garantie.' : 'Nous répondons au plus vite, du lundi au vendredi. Les clients Premium bénéficient d’une réponse sous 24 h ouvrées.') + '</p><p style="margin-top:10px"><a class="b ghost sm" href="mailto:contact@tarrelo.com">contact@tarrelo.com</a> <a class="b ghost sm" href="tel:+33978466369">09 78 46 63 69</a></p></div></section>';
+  }
+
+  // ---------- Interactions ----------
+  function go(id) {
+    var ok = ['tdb', 'appels', 'rdv', 'dossiers', 'commandes', 'stats', 'abonnement', 'factures', 'compte'];
+    if (ok.indexOf(id) < 0) id = 'tdb';
+    document.querySelectorAll('#ec-app a.nav').forEach(function (a) { a.classList.toggle('on', a.dataset.p === id); });
+    document.querySelectorAll('#ec-app section.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + id); });
+    window.scrollTo(0, 0);
+  }
+  function filterTable(id) {
+    var t = document.getElementById(id); if (!t) return;
+    var q = (document.querySelector('[data-filter="' + id + '"]') || {}).value || '';
+    q = q.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    var fm = (document.querySelector('[data-fm="' + id + '"]') || {}).value || '', fs = (document.querySelector('[data-fs="' + id + '"]') || {}).value || '', fp = Number((document.querySelector('[data-fp="' + id + '"]') || {}).value || 0);
+    var n = 0;
+    t.querySelectorAll('tbody tr').forEach(function (r) {
+      var ok = r.textContent.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').indexOf(q) > -1;
+      if (ok && fm) ok = r.dataset.m === fm;
+      if (ok && fs) ok = r.dataset.s === fs;
+      if (ok && fp) ok = since(r.dataset.q, fp);
+      r.style.display = ok ? '' : 'none'; if (ok) n++;
+    });
+    var c = document.querySelector('[data-count="' + id + '"]'); if (c) c.textContent = n + ' élément' + (n > 1 ? 's' : '');
+  }
+  function toast(m, ko) { var t = document.createElement('div'); t.className = 'toast' + (ko ? ' ko' : ''); t.setAttribute('role', 'status'); t.textContent = m; document.getElementById('ec-app').appendChild(t); setTimeout(function () { t.remove(); }, 5200); }
+  function modal(html, onOk, okLabel, danger) {
+    var m = document.createElement('div'); m.className = 'modal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+    m.innerHTML = '<div class="mb">' + html + '<p class="err" hidden></p><div class="row"><button class="b ghost" data-x>Annuler</button>' + (onOk ? '<button class="b' + (danger ? ' danger' : '') + '" data-ok>' + okLabel + '</button>' : '') + '</div></div>';
+    document.getElementById('ec-app').appendChild(m);
+    var close = function () { m.remove(); };
+    m.addEventListener('click', function (e) { if (e.target === m || e.target.hasAttribute('data-x')) close(); });
+    document.addEventListener('keydown', function k(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', k); } });
+    var ok = m.querySelector('[data-ok]');
+    if (ok) ok.addEventListener('click', function () { ok.disabled = true; ok.textContent = 'Un instant…'; onOk(function (err) { if (err) { var e = m.querySelector('.err'); e.hidden = false; e.textContent = err; ok.disabled = false; ok.textContent = okLabel; } else close(); }); });
+    var f = m.querySelector('[data-ok]') || m.querySelector('[data-x]'); if (f) f.focus();
+  }
+  function abo(action, done, msg) {
+    if (DEMO) { done(); toast('Aperçu : aucune modification réelle.'); return; }
+    post('ec/abonnement', { t: T, action: action }).then(function (j) {
+      if (j && j.auth === false) { logout(); return; }
+      if (!j || !j.ok) { done((j && j.error) || 'L’opération n’a pas abouti. Réessayez.'); return; }
+      if (j.url) { window.location.href = j.url; return; }
+      done(); refresh(j.message || msg);
+    }).catch(function () { done('Connexion impossible. Réessayez dans un instant.'); });
+  }
+  var ACT = {
+    logout: function () { logout(); },
+    upgrade: function () {
+      if (premium()) { go('abonnement'); return; }
+      if (!D.abonnement) { location.href = '/tarifs'; return; }
+      var diff = PRIX.premium - PRIX.standard;
+      modal('<h3>Passer en Premium</h3><p>Votre nouvelle mensualité : <strong>' + euro(prixNet('premium')) + ' /mois</strong> (+' + euro(diff) + '). Le changement est immédiat ; la différence au prorata de la période en cours est facturée aujourd’hui sur votre carte enregistrée.</p>'  + '<p style="margin:0 0 6px;color:#14213D;font-weight:700">Vous débloquez immédiatement :</p><ul class="feat">' + PREM.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul><p class="m" style="margin-top:12px">Sans engagement : vous pouvez revenir en Standard à tout moment depuis cet espace.</p>', function (done) { abo('premium', done); }, 'Confirmer le passage en Premium');
+    },
+    downgrade: function () {
+      modal('<h3>Passer en Standard ?</h3><p>Votre mensualité passe à <strong>' + euro(prixNet('standard')) + ' /mois</strong>. Le trop-perçu de la période en cours sera déduit de votre prochaine facture.</p><p>Vous perdrez l’accès à :</p><ul class="feat"><li class="no">Écoute des enregistrements et transcriptions</li><li class="no">Récaps par e-mail</li><li class="no">Dossiers clients, commandes et statistiques détaillées</li><li class="no">Synchronisation agenda, voix personnalisée, appels sortants</li></ul>', function (done) { abo('standard', done); }, 'Confirmer le passage en Standard', true);
+    },
+    resilier: function () {
+      var ab = D.abonnement || {};
+      modal('<h3>Résilier votre abonnement ?</h3><p>Votre assistant continuera de décrocher jusqu’au <strong>' + fdate(ab.fin_periode) + '</strong>, puis vos appels ne seront plus pris en charge. Pensez à désactiver le renvoi d’appel sur votre ligne à cette date.</p>' + (ab.remise ? '<p><strong>Attention :</strong> votre remise « ' + esc(ab.remise_nom || 'à vie') + ' » sera définitivement perdue.</p>' : '') + (ab.formule === 'premium' ? '<p>Vous pouvez aussi simplement <a href="#" data-act="downgrade">passer en Standard</a> pour payer moins.</p>' : '') + '<p class="m">Vous pourrez annuler la résiliation jusqu’à cette date.</p>', function (done) { abo('resilier', done); }, 'Confirmer la résiliation', true);
+    },
+    reprendre: function (el) { if (el) el.disabled = true; abo('reprendre', function (e) { if (e) toast(e, true); }); },
+    portail: function (el) { if (el) { el.disabled = true; el.textContent = 'Ouverture…'; } abo('portail', function (e) { if (e) toast(e, true); if (el) { el.disabled = false; el.textContent = 'Moyen de paiement'; } }); },
+    mdp: function (el) { if (DEMO) { toast('Aperçu : aucun e-mail envoyé.'); return; } el.disabled = true; post('compte/oubli', { email: D.client.email }).catch(function () {}).then(function () { toast('Un lien pour choisir un nouveau mot de passe vient d’être envoyé à ' + D.client.email + '.'); el.disabled = false; }); },
+    csv: function () {
+      var rows = [['Date', 'Appelant', 'Numéro', 'Motif', 'Urgent', 'Rendez-vous', 'Durée (s)', 'Statut', 'Résumé']].concat((D.appels || []).map(function (x) { return [fdt(x.quand), x.nom, x.appelant, (MOTIFS[x.motif] || MOTIFS.autre)[0], x.urgent ? 'oui' : 'non', x.rdv, x.duree_s, STATUTS[x.statut] || x.statut, x.resume]; }));
+      var csv = '﻿' + rows.map(function (r) { return r.map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(';'); }).join('\r\n');
+      var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'appels-tarrelo.csv'; a.click();
+    }
+  };
+  function bind() {
+    var app = document.getElementById('ec-app');
+    app.addEventListener('click', function (e) {
+      var a = e.target.closest('[data-act]');
+      if (a) { e.preventDefault(); var m = document.querySelector('#ec-app .modal'); if (m && a.dataset.act !== 'upgrade' && !a.closest('.modal')) m.remove(); if (m && a.closest('.modal')) m.remove(); ACT[a.dataset.act] && ACT[a.dataset.act](a); return; }
+      var g = e.target.closest('[data-go]'); if (g) { e.preventDefault(); location.hash = g.dataset.go; return; }
+      var au = e.target.closest('[data-audio]');
+      if (au) { var el = document.createElement('audio'); el.controls = true; el.preload = 'auto'; el.src = au.dataset.audio; el.addEventListener('error', function () { toast('Enregistrement indisponible pour le moment.', true); }); au.replaceWith(el); el.play().catch(function () {}); }
+    });
+    app.addEventListener('input', function (e) { var id = e.target.dataset.filter; if (id) filterTable(id); });
+    app.addEventListener('change', function (e) {
+      var t = e.target, id = t.dataset.fm || t.dataset.fs || t.dataset.fp; if (id) { filterTable(id); return; }
+      if (t.dataset.statut) {
+        var call = (D.appels || []).filter(function (x) { return String(x.id) === t.dataset.statut; })[0];
+        if (call) call.statut = t.value;
+        var tr = t.closest('tr'); if (tr) tr.dataset.s = t.value;
+        if (DEMO) { toast('Statut mis à jour (aperçu).'); return; }
+        post('ec/appel', { t: T, id: t.dataset.statut, statut: t.value }).then(function (j) { toast(j && j.ok ? 'Statut mis à jour.' : 'Mise à jour impossible, réessayez.', !(j && j.ok)); });
+      }
+    });
+  }
+  window.addEventListener('hashchange', function () { if (D) go(location.hash.slice(1)); });
+
+  // ---------- Aperçu (données fictives) ----------
+  function demoData(plan) {
+    var now = Date.now(), H = 3600e3;
+    var noms = ['M. Martin', 'Mme Bernard', 'SCI Les Tilleuls', 'M. Petit', 'Mme Durand', 'M. Leroy', 'Mme Moreau', '', 'M. Fournier', 'Mme Girard'];
+    var mot = ['rdv', 'devis', 'urgence', 'information', 'rdv', 'devis', 'commande', 'autre', 'rdv', 'rappel'];
+    var res = { rdv: 'Souhaite un rendez-vous pour l’entretien annuel de sa chaudière. Disponible en semaine après 17 h.', devis: 'Demande un devis pour le remplacement d’un ballon d’eau chaude de 200 L, maison à Mantes-la-Jolie.', urgence: 'Fuite importante sous l’évier, eau coupée au compteur. Demande une intervention rapide.', information: 'Demande les horaires d’ouverture et si vous intervenez à Poissy.', commande: 'Commande deux mitigeurs thermostatiques, retrait en magasin vendredi.', autre: 'Démarchage commercial, aucune suite à donner.', rappel: 'Rappelle au sujet du devis envoyé la semaine dernière, souhaite être recontacté.' };
+    var appels = [];
+    for (var i = 0; i < 46; i++) { var m = mot[i % 10], q = new Date(now - (i * 15.5 + (i % 3) * 4) * H); appels.push({ id: i + 1, quand: q.toISOString(), appelant: '06 1' + (i % 10) + ' 4' + (i % 7) + ' 2' + (i % 5) + ' 8' + (i % 9), nom: noms[i % 10], motif: m, resume: res[m], rdv: m === 'rdv' ? ['Mardi 14 h', 'Jeudi matin', 'Lundi 17 h 30'][i % 3] : '', urgent: m === 'urgence', duree_s: 70 + (i * 37) % 240, statut: i < 3 ? 'a_rappeler' : (i < 6 ? 'nouveau' : 'traite'), transcript: plan === 'premium' ? 'Assistant : Bonjour, Plomberie Dupont, je suis Léa, l’assistante virtuelle. Que puis-je faire pour vous ?\nAppelant : Bonjour, ' + res[m].toLowerCase() + '\nAssistant : Très bien, je note votre demande. Pouvez-vous me donner votre nom et votre adresse ?' : undefined }); }
+    return { ok: true, plan: plan, client: { email: 'contact@exemple.fr', nom: 'Jean Dupont', entreprise: 'Plomberie Dupont', telephone: '06 12 34 56 78', assistant_branche: true, carte: true }, abonnement: { id: 'sub_demo', statut: 'active', statut_lib: 'Actif', formule: plan, prix_base: PRIX[plan], remise: 2000, remise_nom: 'Black Friday −20 €/mois à vie', prix_net: PRIX[plan] - 2000, fin_periode: Math.round(now / 1000) + 18 * 86400, annulation_prevue: false, debut: Math.round(now / 1000) - 60 * 86400 }, factures: [{ numero: 'A1B2C3-0002', date: Math.round(now / 1000) - 12 * 86400, montant: PRIX[plan] - 2000, statut: 'paid', pdf: '', lien: '', periode: { start: Math.round(now / 1000) - 12 * 86400, end: Math.round(now / 1000) + 18 * 86400 } }, { numero: 'A1B2C3-0001', date: Math.round(now / 1000) - 42 * 86400, montant: 0, statut: 'paid', pdf: '', lien: '', periode: null }], documents: [{ titre: 'Récapitulatif d’installation', type: 'Installation', url: '/cgv', date: new Date(now - 58 * 864e5).toISOString() }], appels: appels };
+  }
+
+  // ---------- Démarrage ----------
+  document.addEventListener('DOMContentLoaded', function () {
+    var app = document.createElement('div'); app.id = 'ec-app'; document.body.appendChild(app);
+    initLogin();
+    var q = new URLSearchParams(location.search);
+    if (q.get('apercu') === 'premium' || q.get('apercu') === 'standard') { DEMO = q.get('apercu'); start(); return; }
+    T = load(KEY);
+    if (T) start();
+  });
+})();
