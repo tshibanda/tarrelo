@@ -48,7 +48,7 @@
     ['dossiers', 'Dossiers clients', true], ['commandes', 'Commandes', true], ['stats', 'Statistiques', true],
     ['sep'], ['abonnement', 'Abonnement', false], ['factures', 'Factures et documents', false], ['compte', 'Mon compte', false]
   ];
-  function logo(clair) { return '<span class="tlogo' + (clair ? ' clair' : '') + '">tarrel<span class="o">o</span><svg viewBox="0 0 100 100" fill="none" stroke="#FF6B4A" stroke-linecap="round" aria-hidden="true"><path d="M37.9 33.6A40 40 0 0 1 68.6 59.3" stroke-width="7"></path><path d="M44.7 21.8A53 53 0 0 1 79 50.6" stroke-width="5.5" opacity="0.5"></path></svg></span>'; }
+  function logo(clair) { return '<span class="tlogo" style="font-family: \'Plus Jakarta Sans\', system-ui, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -1px; color: ' + (clair ? '#FFF8F1' : '#14213D') + '">tarrel<span style="color: #FF6B4A">o</span><svg viewBox="0 0 100 100" fill="none" stroke="#FF6B4A" stroke-linecap="round" aria-hidden="true" style="width: 1em; height: 1em; vertical-align: baseline; overflow: visible; margin-left: -0.62em; margin-right: -0.38em"><path d="M37.9 33.6A40 40 0 0 1 68.6 59.3" stroke-width="7"></path><path d="M44.7 21.8A53 53 0 0 1 79 50.6" stroke-width="5.5" opacity="0.5"></path></svg></span>'; }
   function premium() { return D && D.plan === 'premium'; }
 
   // ---------- Connexion ----------
