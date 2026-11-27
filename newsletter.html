@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Newsletter : un conseil tous les 15 jours | Tarrelo</title>
-<meta name="description" content="Un conseil concret tous les 15 jours pour ne plus perdre de clients au téléphone. Pour artisans, commerçants et TPE. Gratuit.">
+<title>Newsletter : un conseil chaque semaine | Tarrelo</title>
+<meta name="description" content="Un conseil concret chaque semaine pour ne plus perdre de clients au téléphone. Pour artisans, commerçants et TPE. Gratuit.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://tarrelo.com/newsletter">
 <meta name="theme-color" content="#14213D">
@@ -17,8 +17,8 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="Tarrelo">
-<meta property="og:title" content="Newsletter : un conseil tous les 15 jours">
-<meta property="og:description" content="Un conseil concret tous les 15 jours pour ne plus perdre de clients au téléphone. Pour artisans, commerçants et TPE. Gratuit.">
+<meta property="og:title" content="Newsletter : un conseil chaque semaine">
+<meta property="og:description" content="Un conseil concret chaque semaine pour ne plus perdre de clients au téléphone. Pour artisans, commerçants et TPE. Gratuit.">
 <meta property="og:url" content="https://tarrelo.com/newsletter">
 <meta property="og:image" content="https://tarrelo.com/assets/og-tarrelo.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -158,17 +158,17 @@ html{scroll-behavior:smooth}</style>
 <main id="contenu">
 <section style="padding: 40px 0 56px"><div class="wrap"><div style="display: flex; flex-direction: column; gap: 16px; max-width: 880px">
 <p class="eyebrow">Newsletter</p>
-<h1 class="h1x" style="font-size: 52px; line-height: 1.06; font-weight: 800; letter-spacing: -1.6px">Un conseil pour ne plus perdre de clients, tous les 15 jours</h1>
-<p class="lead">Pour les artisans, commerçants et petites entreprises : une idée concrète pour mieux gérer vos appels et vos clients, à appliquer en 10 minutes. 2 minutes de lecture, désinscription en un clic.</p>
+<h1 class="h1x" style="font-size: 52px; line-height: 1.06; font-weight: 800; letter-spacing: -1.6px">Un conseil pour ne plus perdre de clients, chaque semaine</h1>
+<p class="lead">Pour les artisans, commerçants et petites entreprises : chaque mardi, une idée concrète pour mieux gérer vos appels et vos clients, à appliquer en 10 minutes, et le guide pratique de la semaine. 2 minutes de lecture, désinscription en un clic. Déjà client ? Vous recevez une édition mensuelle avec le bilan de vos appels.</p>
 </div></div></section>
 <section style="padding: 0 0 88px"><div class="wrap" style="max-width: 640px">
-<form name="newsletter" method="POST" action="/merci" data-netlify="true" netlify-honeypot="site-web" class="card" style="display: flex; flex-direction: column; gap: 16px; padding: 28px">
-<input type="hidden" name="form-name" value="newsletter">
+<form name="newsletter" id="nl-form" method="POST" action="/merci" class="card" style="display: flex; flex-direction: column; gap: 16px; padding: 28px">
 <p hidden><label>Ne pas remplir <input name="site-web"></label></p>
 <label class="field">Prénom<input name="prenom" autocomplete="given-name"></label>
 <label class="field">E-mail professionnel<input name="email" type="email" autocomplete="email" required></label>
 <label style="display: flex; gap: 10px; font-size: 14px; line-height: 1.5; color: #4A5568"><input type="checkbox" name="consentement" value="oui" required style="margin-top: 3px"> J'accepte de recevoir la newsletter Tarrelo. Je peux me désinscrire à tout moment.</label>
 <button type="submit" class="btn" style="background: #FF6B4A; color: #14213D; border: 0; cursor: pointer; font: inherit; font-weight: 600; font-size: 17px">Je m'inscris</button>
+<p id="nl-status" role="status" aria-live="polite" style="font-size: 15px; font-weight: 600" hidden></p>
 <p style="font-size: 13px; color: #4A5568">Vos données restent chez nous : <a href="/confidentialite">confidentialité</a>.</p>
 </form></div></section>
 </main>
@@ -194,5 +194,13 @@ html{scroll-behavior:smooth}</style>
 </div>
 <script src="/assets/site.js" defer></script>
 
+<script>
+(function(){var f=document.getElementById('nl-form');if(!f)return;var st=document.getElementById('nl-status'),b=f.querySelector('button');
+f.addEventListener('submit',function(e){e.preventDefault();if(!f.reportValidity())return;b.disabled=true;b.textContent='Inscription…';st.hidden=true;
+var p=new URLSearchParams(new FormData(f));
+fetch('https://tarrelo.app.n8n.cloud/webhook/tarrelo/newsletter/inscription',{method:'POST',body:p}).then(function(r){return r.json();}).then(function(j){
+if(j&&j.ok){f.querySelectorAll('label,button').forEach(function(x){x.hidden=true;});st.hidden=false;st.style.color='#14213D';st.innerHTML='C’est noté, merci ! Un e-mail de bienvenue vient de partir : pensez à vérifier vos indésirables et à ajouter contact@tarrelo.com à vos contacts.';}
+else throw 0;}).catch(function(){st.hidden=false;st.style.color='#B83A1E';st.textContent='L’inscription n’a pas abouti. Vérifiez votre e-mail ou écrivez-nous à contact@tarrelo.com.';b.disabled=false;b.textContent='Je m’inscris';});});})();
+</script>
 </body>
 </html>

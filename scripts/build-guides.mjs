@@ -5,7 +5,19 @@ import path from 'path';
 
 const DIR = 'contenu/guides';
 const TPL_FILE = 'ressources/renvoi-appel.html';
-if (!fs.existsSync(DIR)) { console.log('Aucun guide automatique.'); process.exit(0); }
+
+// Index public des guides (utilisé par la newsletter automatique) : ressources/guides.json
+function indexGuides() {
+  const un = (t) => String(t || '').replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+  const liste = fs.readdirSync('ressources').filter((f) => f.endsWith('.html')).map((f) => {
+    const h = fs.readFileSync('ressources/' + f, 'utf8');
+    const g = (re) => { const m = h.match(re); return m ? un(m[1]).trim() : ''; };
+    return { slug: f.replace(/\.html$/, ''), url: 'https://tarrelo.com/ressources/' + f.replace(/\.html$/, ''), title: g(/<meta property="og:title" content="([^"]*)"/) || g(/<title>([^<|]*)/), description: g(/<meta name="description" content="([^"]*)"/), date: g(/"datePublished":\s*"([^"]*)"/) };
+  }).filter((x) => x.title).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  fs.writeFileSync('ressources/guides.json', JSON.stringify(liste, null, 2) + '\n');
+  console.log(liste.length + ' guide(s) indexé(s).');
+}
+if (!fs.existsSync(DIR)) { console.log('Aucun guide automatique.'); indexGuides(); process.exit(0); }
 
 const tpl = fs.readFileSync(TPL_FILE, 'utf8');
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -68,3 +80,4 @@ const add = guides.filter((g) => !sm.includes('/ressources/' + g.slug + '<')).ma
 sm = sm.replace('</urlset>', add + '</urlset>');
 fs.writeFileSync('sitemap.xml', sm);
 console.log(guides.length + ' guide(s) automatique(s) construit(s).');
+indexGuides();
