@@ -227,7 +227,7 @@ body.ec-on { background: #FFF8F1; }
 #ec-app .lockbox { border: 1px dashed #F3C5B8; background: #FFF6F2; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; }
 #ec-app .lockbox p { margin: 4px 0 10px; }
 #ec-app .b.on { background: var(--n); color: #FFF8F1; border-color: var(--n); }
-#ec-app .tlogo { white-space: nowrap; line-height: 1; }
+#ec-app .tlogo { white-space: nowrap; line-height: normal; letter-spacing: -1px; }
 #ec-app aside .logo { text-decoration: none; padding: 4px 10px 8px; display: flex; align-items: center; gap: 1px; }
 #ec-app .mtop .logo { text-decoration: none; display: flex; align-items: center; gap: 1px; }
 /* Navigation mobile : barre du bas + feuille « Plus » */
